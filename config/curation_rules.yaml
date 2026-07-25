@@ -1,0 +1,10 @@
+chemistry:
+  neutralize: false
+  tautomer_normalize: false
+  preserve_stereochemistry: true
+  preserve_source_fragments: true
+measurements:
+  automatically_average_conflicts: false
+  preserve_censoring: true
+  transformations: {}
+

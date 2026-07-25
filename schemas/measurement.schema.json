@@ -1,0 +1,274 @@
+{
+  "$defs": {
+    "CensoringStatus": {
+      "enum": [
+        "none",
+        "left",
+        "right",
+        "interval"
+      ],
+      "title": "CensoringStatus",
+      "type": "string"
+    },
+    "EndpointType": {
+      "enum": [
+        "IC50",
+        "Ki",
+        "Kd",
+        "percent inhibition",
+        "residual enzyme activity",
+        "MIC",
+        "MIC fold change",
+        "fractional inhibitory concentration",
+        "time-kill endpoint",
+        "cytotoxicity",
+        "solubility",
+        "permeability",
+        "metabolic stability",
+        "human off-target inhibition"
+      ],
+      "title": "EndpointType",
+      "type": "string"
+    },
+    "ExclusionStatus": {
+      "enum": [
+        "included",
+        "flagged",
+        "excluded"
+      ],
+      "title": "ExclusionStatus",
+      "type": "string"
+    },
+    "ExtractionMethod": {
+      "enum": [
+        "manual",
+        "table_extraction",
+        "figure_digitisation",
+        "database_import",
+        "collaborator_submission"
+      ],
+      "title": "ExtractionMethod",
+      "type": "string"
+    },
+    "MeasurementRelation": {
+      "enum": [
+        "=",
+        "<",
+        "<=",
+        ">",
+        ">=",
+        "~"
+      ],
+      "title": "MeasurementRelation",
+      "type": "string"
+    },
+    "VerificationStatus": {
+      "enum": [
+        "unverified",
+        "identity_pending_verification",
+        "single_curator",
+        "dual_curator",
+        "source_verified"
+      ],
+      "title": "VerificationStatus",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "internal_measurement_id": {
+      "title": "Internal Measurement Id",
+      "type": "string"
+    },
+    "compound_id": {
+      "title": "Compound Id",
+      "type": "string"
+    },
+    "assay_id": {
+      "title": "Assay Id",
+      "type": "string"
+    },
+    "endpoint_type": {
+      "$ref": "#/$defs/EndpointType"
+    },
+    "original_value": {
+      "title": "Original Value",
+      "type": "number"
+    },
+    "original_units": {
+      "title": "Original Units",
+      "type": "string"
+    },
+    "relation": {
+      "$ref": "#/$defs/MeasurementRelation",
+      "default": "="
+    },
+    "standard_value": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Standard Value"
+    },
+    "standard_units": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Standard Units"
+    },
+    "transformed_value": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Transformed Value"
+    },
+    "transform_definition": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Transform Definition"
+    },
+    "replicate_count": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Replicate Count"
+    },
+    "standard_deviation": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Standard Deviation"
+    },
+    "standard_error": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Standard Error"
+    },
+    "lower_bound": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Lower Bound"
+    },
+    "upper_bound": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Upper Bound"
+    },
+    "censoring_status": {
+      "$ref": "#/$defs/CensoringStatus",
+      "default": "none"
+    },
+    "evidence_source_id": {
+      "title": "Evidence Source Id",
+      "type": "string"
+    },
+    "evidence_location": {
+      "title": "Evidence Location",
+      "type": "string"
+    },
+    "extraction_method": {
+      "$ref": "#/$defs/ExtractionMethod"
+    },
+    "curator": {
+      "title": "Curator",
+      "type": "string"
+    },
+    "extraction_date": {
+      "format": "date",
+      "title": "Extraction Date",
+      "type": "string"
+    },
+    "verification_status": {
+      "$ref": "#/$defs/VerificationStatus"
+    },
+    "exclusion_status": {
+      "$ref": "#/$defs/ExclusionStatus",
+      "default": "included"
+    },
+    "exclusion_reason": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Exclusion Reason"
+    }
+  },
+  "required": [
+    "internal_measurement_id",
+    "compound_id",
+    "assay_id",
+    "endpoint_type",
+    "original_value",
+    "original_units",
+    "evidence_source_id",
+    "evidence_location",
+    "extraction_method",
+    "curator",
+    "extraction_date",
+    "verification_status"
+  ],
+  "title": "MeasurementRecord",
+  "type": "object"
+}

@@ -1,0 +1,13 @@
+variants:
+  - {enabled: true, family: IMP, variant_name: IMP-1, research_role: canonical_reference, verification_status: identity_pending_verification, priority: 1, notes: ""}
+  - {enabled: true, family: IMP, variant_name: IMP-6, research_role: escape_candidate, verification_status: identity_pending_verification, priority: 1, notes: ""}
+  - {enabled: true, family: IMP, variant_name: IMP-10, research_role: escape_candidate, verification_status: identity_pending_verification, priority: 1, notes: ""}
+  - {enabled: true, family: IMP, variant_name: IMP-14, research_role: escape_candidate, verification_status: identity_pending_verification, priority: 1, notes: ""}
+  - {enabled: true, family: IMP, variant_name: IMP-26, research_role: escape_candidate, verification_status: identity_pending_verification, priority: 1, notes: ""}
+  - {enabled: true, family: IMP, variant_name: IMP-59, research_role: susceptibility_comparator, verification_status: identity_pending_verification, priority: 2, notes: ""}
+  - {enabled: true, family: NDM, variant_name: NDM-1, research_role: canonical_reference, verification_status: identity_pending_verification, priority: 2, notes: ""}
+  - {enabled: true, family: NDM, variant_name: NDM-9, research_role: escape_candidate, verification_status: identity_pending_verification, priority: 2, notes: ""}
+  - {enabled: true, family: NDM, variant_name: NDM-30, research_role: escape_candidate, verification_status: identity_pending_verification, priority: 2, notes: ""}
+  - {enabled: true, family: VIM, variant_name: VIM-2, research_role: canonical_reference, verification_status: identity_pending_verification, priority: 2, notes: ""}
+  - {enabled: true, family: VIM, variant_name: VIM-83, research_role: escape_candidate, verification_status: identity_pending_verification, priority: 2, notes: ""}
+

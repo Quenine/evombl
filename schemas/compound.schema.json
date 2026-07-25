@@ -1,0 +1,197 @@
+{
+  "$defs": {
+    "StereoStatus": {
+      "enum": [
+        "unspecified",
+        "partial",
+        "specified",
+        "not_applicable"
+      ],
+      "title": "StereoStatus",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "internal_compound_id": {
+      "title": "Internal Compound Id",
+      "type": "string"
+    },
+    "source_compound_ids": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "default": {},
+      "title": "Source Compound Ids",
+      "type": "object"
+    },
+    "original_smiles": {
+      "title": "Original Smiles",
+      "type": "string"
+    },
+    "canonical_smiles": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Canonical Smiles"
+    },
+    "isomeric_smiles": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Isomeric Smiles"
+    },
+    "standard_inchi": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Standard Inchi"
+    },
+    "standard_inchikey": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Standard Inchikey"
+    },
+    "parent_inchikey": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Parent Inchikey"
+    },
+    "stereochemistry_status": {
+      "$ref": "#/$defs/StereoStatus",
+      "default": "unspecified"
+    },
+    "salt_status": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Salt Status"
+    },
+    "molecular_formula": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Molecular Formula"
+    },
+    "molecular_weight": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Molecular Weight"
+    },
+    "scaffold_smiles": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Scaffold Smiles"
+    },
+    "inhibitor_class": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Inhibitor Class"
+    },
+    "metal_binding_motif": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Metal Binding Motif"
+    },
+    "source_record_id": {
+      "title": "Source Record Id",
+      "type": "string"
+    },
+    "curation_status": {
+      "title": "Curation Status",
+      "type": "string"
+    },
+    "curation_notes": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Curation Notes"
+    }
+  },
+  "required": [
+    "internal_compound_id",
+    "original_smiles",
+    "source_record_id",
+    "curation_status"
+  ],
+  "title": "CompoundRecord",
+  "type": "object"
+}

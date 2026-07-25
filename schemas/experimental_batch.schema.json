@@ -1,0 +1,112 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "batch_id": {
+      "title": "Batch Id",
+      "type": "string"
+    },
+    "protocol_id": {
+      "title": "Protocol Id",
+      "type": "string"
+    },
+    "laboratory": {
+      "title": "Laboratory",
+      "type": "string"
+    },
+    "operator": {
+      "title": "Operator",
+      "type": "string"
+    },
+    "date": {
+      "format": "date",
+      "title": "Date",
+      "type": "string"
+    },
+    "compound_batch": {
+      "title": "Compound Batch",
+      "type": "string"
+    },
+    "protein_batch": {
+      "title": "Protein Batch",
+      "type": "string"
+    },
+    "plate_or_run_id": {
+      "title": "Plate Or Run Id",
+      "type": "string"
+    },
+    "controls": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Controls",
+      "type": "array"
+    },
+    "raw_data_path": {
+      "title": "Raw Data Path",
+      "type": "string"
+    },
+    "processed_data_path": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Processed Data Path"
+    },
+    "analysis_version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Analysis Version"
+    },
+    "quality_status": {
+      "title": "Quality Status",
+      "type": "string"
+    },
+    "deviations": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Deviations",
+      "type": "array"
+    },
+    "signed_report_path": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Signed Report Path"
+    }
+  },
+  "required": [
+    "batch_id",
+    "protocol_id",
+    "laboratory",
+    "operator",
+    "date",
+    "compound_batch",
+    "protein_batch",
+    "plate_or_run_id",
+    "controls",
+    "raw_data_path",
+    "quality_status"
+  ],
+  "title": "ExperimentalBatchRecord",
+  "type": "object"
+}

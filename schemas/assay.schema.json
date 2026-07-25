@@ -1,0 +1,252 @@
+{
+  "$defs": {
+    "AssayCategory": {
+      "enum": [
+        "BIOCHEMICAL",
+        "MICROBIOLOGICAL",
+        "CELLULAR",
+        "ADME",
+        "TOXICITY",
+        "SELECTIVITY",
+        "STRUCTURAL"
+      ],
+      "title": "AssayCategory",
+      "type": "string"
+    },
+    "EndpointType": {
+      "enum": [
+        "IC50",
+        "Ki",
+        "Kd",
+        "percent inhibition",
+        "residual enzyme activity",
+        "MIC",
+        "MIC fold change",
+        "fractional inhibitory concentration",
+        "time-kill endpoint",
+        "cytotoxicity",
+        "solubility",
+        "permeability",
+        "metabolic stability",
+        "human off-target inhibition"
+      ],
+      "title": "EndpointType",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "internal_assay_id": {
+      "title": "Internal Assay Id",
+      "type": "string"
+    },
+    "assay_category": {
+      "$ref": "#/$defs/AssayCategory"
+    },
+    "assay_format": {
+      "title": "Assay Format",
+      "type": "string"
+    },
+    "endpoint_type": {
+      "$ref": "#/$defs/EndpointType"
+    },
+    "enzyme_variant_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Enzyme Variant Id"
+    },
+    "substrate": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Substrate"
+    },
+    "beta_lactam_partner": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Beta Lactam Partner"
+    },
+    "zinc_concentration": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Zinc Concentration"
+    },
+    "zinc_units": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Zinc Units"
+    },
+    "buffer": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Buffer"
+    },
+    "pH": {
+      "anyOf": [
+        {
+          "maximum": 14,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Ph"
+    },
+    "temperature": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Temperature"
+    },
+    "incubation_time": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Incubation Time"
+    },
+    "expression_host": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Expression Host"
+    },
+    "bacterial_species": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Bacterial Species"
+    },
+    "bacterial_strain": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Bacterial Strain"
+    },
+    "efflux_status": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Efflux Status"
+    },
+    "permeability_status": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Permeability Status"
+    },
+    "source_id": {
+      "title": "Source Id",
+      "type": "string"
+    },
+    "source_location": {
+      "title": "Source Location",
+      "type": "string"
+    },
+    "assay_comparability_group": {
+      "title": "Assay Comparability Group",
+      "type": "string"
+    },
+    "curation_confidence": {
+      "title": "Curation Confidence",
+      "type": "string"
+    }
+  },
+  "required": [
+    "internal_assay_id",
+    "assay_category",
+    "assay_format",
+    "endpoint_type",
+    "source_id",
+    "source_location",
+    "assay_comparability_group",
+    "curation_confidence"
+  ],
+  "title": "AssayRecord",
+  "type": "object"
+}

@@ -1,0 +1,16 @@
+endpoints:
+  IC50: {dimension: concentration}
+  Ki: {dimension: concentration}
+  Kd: {dimension: concentration}
+  percent inhibition: {dimension: percentage}
+  residual enzyme activity: {dimension: percentage}
+  MIC: {dimension: concentration}
+  MIC fold change: {dimension: ratio}
+  fractional inhibitory concentration: {dimension: ratio}
+  time-kill endpoint: {dimension: context_dependent}
+  cytotoxicity: {dimension: context_dependent}
+  solubility: {dimension: concentration}
+  permeability: {dimension: context_dependent}
+  metabolic stability: {dimension: context_dependent}
+  human off-target inhibition: {dimension: context_dependent}
+

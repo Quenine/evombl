@@ -1,0 +1,225 @@
+{
+  "$defs": {
+    "MBLFamily": {
+      "enum": [
+        "IMP",
+        "NDM",
+        "VIM",
+        "OTHER"
+      ],
+      "title": "MBLFamily",
+      "type": "string"
+    },
+    "MutationRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "author_reported_mutation": {
+          "title": "Author Reported Mutation",
+          "type": "string"
+        },
+        "author_numbering_scheme": {
+          "title": "Author Numbering Scheme",
+          "type": "string"
+        },
+        "standardised_bbl_numbering": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Standardised Bbl Numbering"
+        },
+        "reference_sequence_used": {
+          "title": "Reference Sequence Used",
+          "type": "string"
+        },
+        "verification_status": {
+          "$ref": "#/$defs/VerificationStatus"
+        }
+      },
+      "required": [
+        "author_reported_mutation",
+        "author_numbering_scheme",
+        "reference_sequence_used",
+        "verification_status"
+      ],
+      "title": "MutationRecord",
+      "type": "object"
+    },
+    "VerificationStatus": {
+      "enum": [
+        "unverified",
+        "identity_pending_verification",
+        "single_curator",
+        "dual_curator",
+        "source_verified"
+      ],
+      "title": "VerificationStatus",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "internal_variant_id": {
+      "title": "Internal Variant Id",
+      "type": "string"
+    },
+    "family": {
+      "$ref": "#/$defs/MBLFamily"
+    },
+    "variant_name": {
+      "title": "Variant Name",
+      "type": "string"
+    },
+    "reference_variant": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Reference Variant"
+    },
+    "raw_sequence": {
+      "title": "Raw Sequence",
+      "type": "string"
+    },
+    "mature_sequence": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Mature Sequence"
+    },
+    "sequence_accession": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Sequence Accession"
+    },
+    "nucleotide_accession": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Nucleotide Accession"
+    },
+    "organism": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Organism"
+    },
+    "signal_peptide_start": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Signal Peptide Start"
+    },
+    "signal_peptide_end": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Signal Peptide End"
+    },
+    "numbering_scheme": {
+      "title": "Numbering Scheme",
+      "type": "string"
+    },
+    "mutation_list": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/MutationRecord"
+      },
+      "title": "Mutation List",
+      "type": "array"
+    },
+    "sequence_hash": {
+      "title": "Sequence Hash",
+      "type": "string"
+    },
+    "structure_ids": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Structure Ids",
+      "type": "array"
+    },
+    "evidence_source_ids": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Evidence Source Ids",
+      "type": "array"
+    },
+    "verification_status": {
+      "$ref": "#/$defs/VerificationStatus"
+    },
+    "curation_notes": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Curation Notes"
+    }
+  },
+  "required": [
+    "internal_variant_id",
+    "family",
+    "variant_name",
+    "raw_sequence",
+    "numbering_scheme",
+    "sequence_hash",
+    "verification_status"
+  ],
+  "title": "ProteinVariantRecord",
+  "type": "object"
+}

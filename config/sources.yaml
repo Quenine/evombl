@@ -1,0 +1,16 @@
+sources:
+  - BLDB
+  - ChEMBL
+  - BindingDB
+  - PubChem BioAssay
+  - NCBI Protein
+  - NCBI Nucleotide
+  - RCSB PDB
+  - Crossref
+  - Europe PMC
+  - primary literature
+  - supplementary information
+  - patents
+  - collaborator-generated data
+retrieval_implemented: false
+
