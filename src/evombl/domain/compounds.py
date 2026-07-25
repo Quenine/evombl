@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from .enums import StereoStatus
 
@@ -6,7 +6,7 @@ from .enums import StereoStatus
 class CompoundRecord(BaseModel):
     model_config = ConfigDict(extra="forbid")
     internal_compound_id: str
-    source_compound_ids: dict[str, str] = {}
+    source_compound_ids: dict[str, str] = Field(default_factory=dict)
     original_smiles: str
     canonical_smiles: str | None = None
     isomeric_smiles: str | None = None

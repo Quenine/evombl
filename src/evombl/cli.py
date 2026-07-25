@@ -16,9 +16,34 @@ from evombl.domain import (
 )
 from evombl.proteins.sequences import normalize_sequence, sequence_hash
 from evombl.provenance.manifests import write_manifest
-from evombl.storage.database import initialize_database, verify_integrity
+from evombl.storage.database import (
+    initialize_database,
+    verify_integrity,
+)
+from evombl.storage.database import (
+    migrate as run_migrations,
+)
+from evombl.storage.database import (
+    schema_version as read_schema_version,
+)
 
 app = typer.Typer(help="EvoMBL evidence infrastructure.")
+
+
+@app.command("migrate")
+def migrate(path: Path = Path("data/evombl.duckdb")) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    typer.echo(f"Schema version {run_migrations(path)}")
+
+
+@app.command("schema-version")
+def schema_version(path: Path = Path("data/evombl.duckdb")) -> None:
+    typer.echo(read_schema_version(path))
+
+
+@app.command("verify-evidence-graph")
+def verify_evidence_graph(path: Path = Path("data/evombl.duckdb")) -> None:
+    verify_data(path)
 
 
 @app.command("init-db")

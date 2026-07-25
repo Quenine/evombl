@@ -21,7 +21,6 @@
       "additionalProperties": {
         "type": "string"
       },
-      "default": {},
       "title": "Source Compound Ids",
       "type": "object"
     },

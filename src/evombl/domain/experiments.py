@@ -1,6 +1,6 @@
 from datetime import date
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class ExperimentalBatchRecord(BaseModel):
@@ -18,5 +18,5 @@ class ExperimentalBatchRecord(BaseModel):
     processed_data_path: str | None = None
     analysis_version: str | None = None
     quality_status: str
-    deviations: list[str] = []
+    deviations: list[str] = Field(default_factory=list)
     signed_report_path: str | None = None

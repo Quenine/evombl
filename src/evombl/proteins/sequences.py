@@ -11,6 +11,15 @@ def normalize_sequence(sequence: str) -> str:
     return normalized
 
 
+def normalize_source_sequence(sequence: str) -> tuple[str, bool]:
+    compact = "".join(sequence.split()).upper()
+    had_stop = compact.endswith("*")
+    if "*" in compact[:-1]:
+        raise ValueError("stop character is only permitted at the source terminus")
+    normalized = normalize_sequence(compact.removesuffix("*"))
+    return normalized, had_stop
+
+
 def sequence_hash(sequence: str) -> str:
     return hashlib.sha256(normalize_sequence(sequence).encode("ascii")).hexdigest()
 

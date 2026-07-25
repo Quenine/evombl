@@ -91,6 +91,23 @@
       "title": "Raw Sequence",
       "type": "string"
     },
+    "normalized_sequence": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Normalized Sequence"
+    },
+    "source_had_terminal_stop": {
+      "default": false,
+      "title": "Source Had Terminal Stop",
+      "type": "boolean"
+    },
     "mature_sequence": {
       "anyOf": [
         {
@@ -168,7 +185,6 @@
       "type": "string"
     },
     "mutation_list": {
-      "default": [],
       "items": {
         "$ref": "#/$defs/MutationRecord"
       },
@@ -180,7 +196,6 @@
       "type": "string"
     },
     "structure_ids": {
-      "default": [],
       "items": {
         "type": "string"
       },
@@ -188,7 +203,6 @@
       "type": "array"
     },
     "evidence_source_ids": {
-      "default": [],
       "items": {
         "type": "string"
       },

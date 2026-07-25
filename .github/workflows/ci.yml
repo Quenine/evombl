@@ -1,4 +1,4 @@
-name: CI
+name: EvoMBL evidence integrity
 on:
   push:
   pull_request:
@@ -11,8 +11,13 @@ jobs:
         with:
           python-version: "3.12"
           enable-cache: true
-      - run: uv sync --all-groups
+      - run: uv sync --all-groups --frozen
+      - run: uv run ruff format --check .
       - run: uv run ruff check .
       - run: uv run mypy
       - run: uv run pytest
-
+      - run: uv run evombl validate-config
+      - run: uv run evombl export-schemas
+      - run: git diff --exit-code -- schemas
+      - run: uv run evombl migrate --path data/ci.duckdb
+      - run: uv run evombl verify-evidence-graph --path data/ci.duckdb
