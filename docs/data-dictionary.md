@@ -10,3 +10,6 @@ Assays define experimental context. Measurements point to exactly one assay, com
 evidence source. Protein mutations carry author numbering and an explicit reference;
 standard BBL numbering is populated only after verification.
 
+Batch 2B relational entities include source documents, immutable source files, structured locations and identifiers, retrieval events, aliases, accessions, sequences, mutation observations, numbering mappings, structures and chains, protocols, assay conditions, curation events, and releases. JSON snapshots are deterministic; matrix and provenance fields remain relationally queryable.
+
+Schema version 3 rebuilds measurements with a mandatory foreign key to `source_locations` and a deterministic immutable `record_hash`. Applied migration files are identified by SHA-256 checksums; changed applied files are rejected.

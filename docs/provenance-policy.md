@@ -10,3 +10,6 @@ No accession, mutation, structure ID, measurement, or bibliographic fact may be 
 to fill a gap. Collaborator data retain protocol, batch, operator, control, deviation, raw
 path, analysis version, and signed-report lineage.
 
+Official-API responses use content-addressed SHA-256 paths. Provider/identifier indexes select the latest captured revision for deterministic offline reuse; prior captures are never overwritten. Retrieval metadata is not a verified scientific assertion. Malformed or unsuccessful responses are not retained as valid captures.
+
+Changed valid content creates a new immutable capture and must be represented by a `SourceRevisionRecord`. Retrieval events distinguish success, HTTP failure, timeout, malformed response, and offline cache miss; failure events never carry the meaning of a valid source capture.

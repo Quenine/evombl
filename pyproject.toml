@@ -43,9 +43,9 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "RUF"]
+ignore = ["E501"]
 
 [tool.mypy]
 python_version = "3.12"
 strict = true
 packages = ["evombl"]
-

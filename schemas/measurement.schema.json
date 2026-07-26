@@ -223,6 +223,10 @@
       "title": "Evidence Location",
       "type": "string"
     },
+    "source_location_id": {
+      "title": "Source Location Id",
+      "type": "string"
+    },
     "extraction_method": {
       "$ref": "#/$defs/ExtractionMethod"
     },
@@ -264,6 +268,7 @@
     "original_units",
     "evidence_source_id",
     "evidence_location",
+    "source_location_id",
     "extraction_method",
     "curator",
     "extraction_date",

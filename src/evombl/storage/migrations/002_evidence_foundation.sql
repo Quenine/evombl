@@ -2,10 +2,10 @@ CREATE TABLE source_documents(document_id VARCHAR PRIMARY KEY, source_id VARCHAR
 CREATE TABLE source_files(file_id VARCHAR PRIMARY KEY, document_id VARCHAR NOT NULL REFERENCES source_documents(document_id), path VARCHAR NOT NULL, sha256 VARCHAR NOT NULL, immutable BOOLEAN NOT NULL DEFAULT true);
 CREATE TABLE source_locations(location_id VARCHAR PRIMARY KEY, source_id VARCHAR NOT NULL REFERENCES evidence_sources(source_id), location_type VARCHAR NOT NULL, page VARCHAR, section VARCHAR, object_label VARCHAR, record_json JSON NOT NULL);
 CREATE TABLE source_identifiers(identifier_id VARCHAR PRIMARY KEY, source_id VARCHAR NOT NULL REFERENCES evidence_sources(source_id), scheme VARCHAR NOT NULL, value VARCHAR NOT NULL, UNIQUE(scheme,value));
-CREATE TABLE source_retrieval_events(retrieval_id VARCHAR PRIMARY KEY, source_id VARCHAR NOT NULL, provider VARCHAR NOT NULL, accessed_at TIMESTAMP NOT NULL, response_hash VARCHAR NOT NULL, response_path VARCHAR NOT NULL);
+CREATE TABLE source_retrieval_events(retrieval_id VARCHAR PRIMARY KEY, source_id VARCHAR NOT NULL, provider VARCHAR NOT NULL, accessed_at TIMESTAMP NOT NULL, outcome VARCHAR NOT NULL, response_hash VARCHAR, response_path VARCHAR, error_type VARCHAR, error_message VARCHAR);
 CREATE TABLE compound_aliases(alias_id VARCHAR PRIMARY KEY, compound_id VARCHAR NOT NULL, alias VARCHAR NOT NULL, source_id VARCHAR);
 CREATE TABLE compound_source_links(compound_id VARCHAR NOT NULL, source_id VARCHAR NOT NULL, PRIMARY KEY(compound_id,source_id));
-CREATE TABLE protein_sequences(sequence_id VARCHAR PRIMARY KEY, variant_id VARCHAR NOT NULL, sequence_kind VARCHAR NOT NULL, sequence_hash VARCHAR NOT NULL, sequence VARCHAR NOT NULL);
+CREATE TABLE protein_sequences(sequence_id VARCHAR PRIMARY KEY, variant_id VARCHAR NOT NULL REFERENCES protein_variants(internal_variant_id), source_id VARCHAR NOT NULL REFERENCES evidence_sources(source_id), sequence_kind VARCHAR NOT NULL, sequence_hash VARCHAR NOT NULL, sequence VARCHAR NOT NULL);
 CREATE TABLE variant_aliases(alias_id VARCHAR PRIMARY KEY, variant_id VARCHAR NOT NULL, alias VARCHAR NOT NULL, source_id VARCHAR);
 CREATE TABLE variant_accessions(accession_id VARCHAR PRIMARY KEY, variant_id VARCHAR NOT NULL, accession VARCHAR NOT NULL, accession_type VARCHAR NOT NULL, source_database VARCHAR NOT NULL, verification_status VARCHAR NOT NULL);
 CREATE TABLE variant_source_links(variant_id VARCHAR NOT NULL, source_id VARCHAR NOT NULL, PRIMARY KEY(variant_id,source_id));
@@ -15,7 +15,9 @@ CREATE TABLE protein_structures(structure_id VARCHAR PRIMARY KEY, variant_id VAR
 CREATE TABLE structure_chains(chain_id VARCHAR PRIMARY KEY, structure_id VARCHAR NOT NULL, chain_label VARCHAR NOT NULL, construct_start INTEGER, construct_end INTEGER, sequence_hash VARCHAR);
 CREATE TABLE protocols(protocol_id VARCHAR PRIMARY KEY, source_id VARCHAR NOT NULL, record_json JSON NOT NULL);
 CREATE TABLE assay_conditions(condition_id VARCHAR PRIMARY KEY, assay_id VARCHAR NOT NULL, condition_type VARCHAR NOT NULL, original_value VARCHAR, original_units VARCHAR, record_json JSON NOT NULL);
-ALTER TABLE measurements ADD COLUMN IF NOT EXISTS source_location_id VARCHAR;
+ALTER TABLE measurements ADD COLUMN source_location_id VARCHAR;
+CREATE UNIQUE INDEX source_files_sha256_idx ON source_files(sha256);
+CREATE INDEX retrieval_source_idx ON source_retrieval_events(source_id,accessed_at);
 CREATE VIEW current_verified_sources AS SELECT * FROM evidence_sources WHERE json_extract_string(record_json,'$.verification_status') IN ('source_verified','dual_curator');
 CREATE VIEW current_verified_variants AS SELECT * FROM protein_variants WHERE json_extract_string(record_json,'$.verification_status')='source_verified';
 CREATE VIEW biochemical_measurement_matrix AS SELECT m.compound_id,a.enzyme_variant_id,m.endpoint_type,m.original_value,m.original_units FROM measurements m JOIN assays a ON m.assay_id=a.internal_assay_id WHERE json_extract_string(a.record_json,'$.assay_category')='BIOCHEMICAL';

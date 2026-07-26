@@ -13,3 +13,8 @@
 Endpoint types remain separate. Cross-endpoint conversion or pooling requires an explicit
 scientific decision recorded in the decision log.
 
+## Batch 2B persistence controls
+
+Scientific records are inserted through fixed-SQL typed repositories. An identical immutable record is idempotent; changed content under the same identifier is rejected and requires a curation event or explicit revision. Complete evidence graphs are committed in one transaction. Measurements require structured source locations, assay endpoints must agree exactly, and variant sequences must link to their source.
+
+Official adapters apply provider-specific rate policies with bounded retries. NCBI API-key and no-key modes have distinct request intervals. Retry-After is honored without treating the response as evidence.

@@ -19,6 +19,7 @@ def measurement(**changes: object) -> MeasurementRecord:
         "censoring_status": "none",
         "evidence_source_id": "SYNTHETIC_TEST_DATA-S1",
         "evidence_location": "synthetic row 1",
+        "source_location_id": "SYNTHETIC_TEST_DATA-LOC1",
         "extraction_method": "manual",
         "curator": "SYNTHETIC_TEST_DATA",
         "extraction_date": date(2026, 1, 1),

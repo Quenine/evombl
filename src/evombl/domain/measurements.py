@@ -42,6 +42,7 @@ class MeasurementRecord(BaseModel):
     censoring_status: CensoringStatus = CensoringStatus.NONE
     evidence_source_id: str
     evidence_location: str
+    source_location_id: str
     extraction_method: ExtractionMethod
     curator: str
     extraction_date: date

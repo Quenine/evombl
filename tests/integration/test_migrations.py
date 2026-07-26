@@ -7,9 +7,9 @@ from evombl.storage.database import migrate, schema_version
 
 def test_migrations_are_ordered_and_idempotent(tmp_path: Path) -> None:
     path = tmp_path / "SYNTHETIC_TEST_DATA-migrations.duckdb"
-    assert migrate(path) == 2
-    assert migrate(path) == 2
-    assert schema_version(path) == 2
+    assert migrate(path) == 3
+    assert migrate(path) == 3
+    assert schema_version(path) == 3
     with duckdb.connect(str(path)) as connection:
         views = {
             row[0]

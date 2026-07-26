@@ -8,6 +8,8 @@ from typing import Any, Protocol
 import httpx
 from tenacity import retry, stop_after_attempt, wait_exponential
 
+from .rate_limit import RateLimiter, policy_for
+
 
 @dataclass(frozen=True)
 class MetadataCapture:
@@ -31,13 +33,24 @@ class OfficialApiAdapter:
     provider = "base"
 
     def __init__(
-        self, capture_dir: Path, contact_email: str, user_agent: str, timeout: float = 20.0
+        self,
+        capture_dir: Path,
+        contact_email: str,
+        user_agent: str,
+        timeout: float = 20.0,
+        client: httpx.Client | None = None,
+        rate_limiter: RateLimiter | None = None,
+        ncbi_api_key: bool = False,
     ) -> None:
         self.capture_dir, self.contact_email, self.user_agent, self.timeout = (
             capture_dir,
             contact_email,
             user_agent,
             timeout,
+        )
+        self.client = client or httpx.Client()
+        self.rate_limiter = rate_limiter or RateLimiter(
+            policy_for(self.provider, ncbi_api_key=ncbi_api_key)
         )
 
     def url(self, identifier: str) -> str:
@@ -48,22 +61,47 @@ class OfficialApiAdapter:
         self, identifier: str, *, offline: bool = False, refresh: bool = False
     ) -> MetadataCapture:
         key = hashlib.sha256(f"{self.provider}:{identifier}".encode()).hexdigest()
-        target = self.capture_dir / self.provider / f"{key}.json"
+        provider_dir = self.capture_dir / self.provider
+        index = provider_dir / f"{key}.latest"
+        target = (
+            provider_dir / index.read_text().strip() if index.exists() else provider_dir / "missing"
+        )
         if target.exists() and not refresh:
             raw = target.read_bytes()
         elif offline:
             raise RuntimeError("offline mode: immutable capture is unavailable")
         else:
-            response = httpx.get(
+            self.rate_limiter.acquire()
+            response = self.client.get(
                 self.url(identifier),
                 timeout=self.timeout,
                 headers={"User-Agent": f"{self.user_agent} mailto:{self.contact_email}"},
             )
+            if response.status_code == 429:
+                retry_after = response.headers.get("Retry-After")
+                self.rate_limiter.acquire(float(retry_after) if retry_after else None)
             response.raise_for_status()
             raw = response.content
+            try:
+                candidate_payload = json.loads(raw)
+            except json.JSONDecodeError as exc:
+                raise ValueError(f"malformed {self.provider} JSON response") from exc
+            if not isinstance(candidate_payload, dict):
+                raise ValueError("metadata response must be a JSON object")
+            digest = hashlib.sha256(raw).hexdigest()
+            target = provider_dir / f"sha256-{digest}.json"
             target.parent.mkdir(parents=True, exist_ok=True)
-            target.write_bytes(raw)
-        payload = json.loads(raw)
+            if target.exists() and target.read_bytes() != raw:
+                raise RuntimeError("immutable capture hash collision")
+            if not target.exists():
+                target.write_bytes(raw)
+            index.write_text(target.name, encoding="utf-8")
+        try:
+            payload = json.loads(raw)
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"malformed {self.provider} JSON response") from exc
+        if not isinstance(payload, dict):
+            raise ValueError("metadata response must be a JSON object")
         return MetadataCapture(
             self.provider,
             identifier,
@@ -95,8 +133,11 @@ class NcbiAdapter(OfficialApiAdapter):
         return f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=protein&id={identifier}&retmode=json"
 
 
-class RcdbPdbAdapter(OfficialApiAdapter):
+class RcsbPdbAdapter(OfficialApiAdapter):
     provider = "rcsb_pdb"
 
     def url(self, identifier: str) -> str:
         return f"https://data.rcsb.org/rest/v1/core/entry/{identifier}"
+
+
+RcdbPdbAdapter = RcsbPdbAdapter
