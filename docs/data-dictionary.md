@@ -13,3 +13,9 @@ standard BBL numbering is populated only after verification.
 Batch 2B relational entities include source documents, immutable source files, structured locations and identifiers, retrieval events, aliases, accessions, sequences, mutation observations, numbering mappings, structures and chains, protocols, assay conditions, curation events, and releases. JSON snapshots are deterministic; matrix and provenance fields remain relationally queryable.
 
 Schema version 3 rebuilds measurements with a mandatory foreign key to `source_locations` and a deterministic immutable `record_hash`. Applied migration files are identified by SHA-256 checksums; changed applied files are rejected.
+## Batch 2C1 tables
+
+- `seed_source_registry`: stable DOI/PMID-independent seed identity mapped to an evidence source and provisional request.
+- `metadata_candidates`: immutable normalized candidate plus original provider values, response hash, and retrieval-event link.
+- `metadata_comparisons`: deterministic field-level agreement or conflict records.
+- `bibliographic_audits`: derived bibliographic status, relevance triage, legal-access state, and manual-review flag; it does not alter scientific verification status.

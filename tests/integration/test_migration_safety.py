@@ -15,7 +15,7 @@ def test_checksum_mismatch_is_rejected(tmp_path: Path) -> None:
         )
     with pytest.raises(RuntimeError, match="checksum mismatch"):
         migrate(path)
-    assert schema_version(path) == 4
+    assert schema_version(path) == 7
 
 
 def test_measurement_location_foreign_key_exists(tmp_path: Path) -> None:

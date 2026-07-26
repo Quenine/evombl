@@ -12,5 +12,12 @@ sources:
   - supplementary information
   - patents
   - collaborator-generated data
-retrieval_implemented: false
-
+metadata_retrieval:
+  enabled: true
+  official_apis_only: true
+  preserve_raw_captures: true
+  permit_scientific_promotion: false
+  permit_activity_ingestion: false
+  permit_pdf_download: false
+  permit_publisher_scraping: false
+  policy_version: metadata-retrieval-v1

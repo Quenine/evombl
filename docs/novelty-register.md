@@ -14,3 +14,6 @@
 | Distal/allosteric variant effects | Seed source 10.1016/j.jinorgbio.2026.113335 | Mechanistic analysis | Links distal networks to inhibitor escape | provisional | Metadata and scientific verification | Mechanistic workstream | 2026-07-25 |
 
 Blank cells are intentional governance fields, not scientific assertions.
+## Batch 2C1 limitation
+
+Bibliographic resolution or purpose-keyword overlap is not novelty evidence. No novelty claim is promoted until the underlying scientific full text is legally accessed and manually curated.

@@ -50,7 +50,11 @@ class RateLimiter:
 def policy_for(
     configuration: RateLimitConfiguration, provider: str, *, ncbi_api_key: bool = False
 ) -> RateLimitPolicy:
-    key = ("ncbi_api_key" if ncbi_api_key else "ncbi_no_key") if provider == "ncbi" else provider
+    key = (
+        ("ncbi_api_key" if ncbi_api_key else "ncbi_no_key")
+        if provider.startswith("ncbi")
+        else provider
+    )
     try:
         return configuration.providers[key]
     except KeyError as exc:

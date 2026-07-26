@@ -1,0 +1,9 @@
+seed_id,open_access,licence,manual_review_required
+EVO-SEED-001,False,https://doi.org/10.1128/ASMCopyrightv2,True
+EVO-SEED-002,False,https://doi.org/10.1128/ASMCopyrightv2,True
+EVO-SEED-003,True,https://creativecommons.org/licenses/by/4.0/,True
+EVO-SEED-004,True,https://creativecommons.org/licenses/by/4.0/,True
+EVO-SEED-005,True,https://creativecommons.org/licenses/by/4.0/,True
+EVO-SEED-006,False,https://creativecommons.org/licenses/by/4.0/,True
+EVO-SEED-007,False,https://www.elsevier.com/tdm/userlicense/1.0/,True
+EVO-SEED-008,True,https://creativecommons.org/licenses/by/4.0/,True

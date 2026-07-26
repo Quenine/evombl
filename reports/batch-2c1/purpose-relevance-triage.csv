@@ -1,0 +1,9 @@
+seed_id,relevance_status,relevance_rule
+EVO-SEED-001,possibly_relevant,keyword-overlap-v1:1
+EVO-SEED-002,likely_relevant,keyword-overlap-v1:2
+EVO-SEED-003,manual_review_required,keyword-overlap-v1:0
+EVO-SEED-004,likely_relevant,keyword-overlap-v1:6
+EVO-SEED-005,manual_review_required,keyword-overlap-v1:0
+EVO-SEED-006,likely_relevant,keyword-overlap-v1:2
+EVO-SEED-007,likely_relevant,keyword-overlap-v1:4
+EVO-SEED-008,likely_relevant,keyword-overlap-v1:4

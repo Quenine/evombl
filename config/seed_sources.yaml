@@ -1,9 +1,9 @@
 sources:
-  - {doi: 10.1128/aac.00991-23, purpose: taniborbactam activity across acquired MBL enzymes and resistant variants, verification_status: metadata_pending_verification}
-  - {doi: 10.1128/aac.01570-23, purpose: comparative xeruborbactam and taniborbactam inhibition including IMP-10, verification_status: metadata_pending_verification}
-  - {doi: 10.1128/aac.00297-25, pmid: '40488615', purpose: IMP-6 IMP-10 IMP-14 IMP-26 and IMP-59 variant-response evidence, verification_status: metadata_pending_verification}
-  - {doi: 10.1128/aac.01699-24, purpose: cefepime-taniborbactam coverage across engineered isogenic beta-lactamases, verification_status: metadata_pending_verification}
-  - {doi: 10.1128/aac.00579-23, purpose: NDM-9 response to taniborbactam and xeruborbactam, verification_status: metadata_pending_verification}
-  - {doi: 10.1128/aac.00426-26, pmid: '42307233', purpose: APC148 Phase I and current clinical competitor landscape, verification_status: metadata_pending_verification}
-  - {doi: 10.1016/j.jinorgbio.2026.113335, pmid: '41996979', purpose: IMP-1 evolutionary and distal allosteric-network analysis, verification_status: metadata_pending_verification}
-  - {doi: 10.1128/spectrum.02788-25, pmid: '41660846', purpose: VIM-28 structural kinetic stability and zinc-affinity analysis, verification_status: metadata_pending_verification}
+  - {seed_id: EVO-SEED-001, doi: 10.1128/aac.00991-23, purpose: taniborbactam activity across acquired MBL enzymes and resistant variants, verification_status: metadata_pending_verification}
+  - {seed_id: EVO-SEED-002, doi: 10.1128/aac.01570-23, purpose: comparative xeruborbactam and taniborbactam inhibition including IMP-10, verification_status: metadata_pending_verification}
+  - {seed_id: EVO-SEED-003, doi: 10.1128/aac.00297-25, pmid: '40488615', purpose: IMP-6 IMP-10 IMP-14 IMP-26 and IMP-59 variant-response evidence, verification_status: metadata_pending_verification}
+  - {seed_id: EVO-SEED-004, doi: 10.1128/aac.01699-24, purpose: cefepime-taniborbactam coverage across engineered isogenic beta-lactamases, verification_status: metadata_pending_verification}
+  - {seed_id: EVO-SEED-005, doi: 10.1128/aac.00579-23, purpose: NDM-9 response to taniborbactam and xeruborbactam, verification_status: metadata_pending_verification}
+  - {seed_id: EVO-SEED-006, doi: 10.1128/aac.00426-26, pmid: '42307233', purpose: APC148 Phase I and current clinical competitor landscape, verification_status: metadata_pending_verification}
+  - {seed_id: EVO-SEED-007, doi: 10.1016/j.jinorgbio.2026.113335, pmid: '41996979', purpose: IMP-1 evolutionary and distal allosteric-network analysis, verification_status: metadata_pending_verification}
+  - {seed_id: EVO-SEED-008, doi: 10.1128/spectrum.02788-25, pmid: '41660846', purpose: VIM-28 structural kinetic stability and zinc-affinity analysis, verification_status: metadata_pending_verification}

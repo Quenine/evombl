@@ -1,0 +1,9 @@
+seed_id,source_id,status,verified_doi,verified_pmid,doi_pmid_link_verified,relevance_status,open_access,manual_review_required
+EVO-SEED-001,EVO-SRC-3C6ED4B1C20AC7DA,metadata_conflict,,,False,possibly_relevant,False,True
+EVO-SEED-002,EVO-SRC-1F1F4BFCE7FB91BC,metadata_conflict,,,False,likely_relevant,False,True
+EVO-SEED-003,EVO-SRC-A4914971E736EA36,metadata_conflict,,40488615,True,manual_review_required,True,True
+EVO-SEED-004,EVO-SRC-4A0FF0F1E6942324,metadata_conflict,,,False,likely_relevant,True,True
+EVO-SEED-005,EVO-SRC-1ED143DCEF91EF9C,metadata_conflict,,,False,manual_review_required,True,True
+EVO-SEED-006,EVO-SRC-1AA6599CEC290236,metadata_conflict,,42307233,True,likely_relevant,False,True
+EVO-SEED-007,EVO-SRC-2FC255DC846D4B6F,metadata_conflict,,41996979,True,likely_relevant,False,True
+EVO-SEED-008,EVO-SRC-68FC875981F77C80,metadata_conflict,,41660846,True,likely_relevant,True,True

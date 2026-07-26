@@ -27,6 +27,62 @@ VIEWS = (
 )
 
 
+def _backfill_candidate_versions(connection: duckdb.DuckDBPyConnection) -> None:
+    from evombl.domain.bibliographic import MetadataCandidateRecord
+    from evombl.ingestion.bibliographic import (
+        LEGACY_PUBMED_NORMALIZER_VERSION,
+        logical_candidate_key,
+        normalization_version_hash,
+        normalized_candidate_hash,
+        semantic_candidate_hash,
+    )
+
+    before_row = connection.execute("SELECT count(*) FROM metadata_candidates").fetchone()
+    before = int(before_row[0]) if before_row else 0
+    rows = connection.execute(
+        "SELECT m.candidate_id,m.source_id,m.provider,m.response_hash,m.record_json,"
+        "r.requested_identifier,r.request_timestamp "
+        "FROM metadata_candidates m JOIN source_retrieval_events r "
+        "ON r.retrieval_id=m.retrieval_event_id ORDER BY m.candidate_id"
+    ).fetchall()
+    if len(rows) != before:
+        raise RuntimeError("every metadata candidate must retain a retrieval event")
+    for candidate_id, source_id, provider, _, payload, requested, created_at in rows:
+        record = MetadataCandidateRecord.model_validate_json(payload)
+        version = (
+            LEGACY_PUBMED_NORMALIZER_VERSION
+            if provider == "ncbi_pubmed"
+            else "bibliographic-normalizer-v1"
+        )
+        connection.execute(
+            "UPDATE metadata_candidates SET logical_candidate_key=?,requested_identifier=?,"
+            "normalization_version=?,normalization_version_hash=?,normalized_record_hash=?,"
+            "semantic_bibliographic_hash=?,predecessor_candidate_id=NULL,"
+            "candidate_status='legacy_preserved',manual_review_required=false,created_at=? "
+            "WHERE candidate_id=?",
+            [
+                logical_candidate_key(str(source_id), str(provider), str(requested)),
+                requested,
+                version,
+                normalization_version_hash(version),
+                normalized_candidate_hash(record),
+                semantic_candidate_hash(record),
+                created_at,
+                candidate_id,
+            ],
+        )
+    after_row = connection.execute("SELECT count(*) FROM metadata_candidates").fetchone()
+    after = int(after_row[0]) if after_row else 0
+    missing_row = connection.execute(
+        "SELECT count(*) FROM metadata_candidates WHERE logical_candidate_key IS NULL "
+        "OR requested_identifier IS NULL OR normalization_version_hash IS NULL "
+        "OR normalized_record_hash IS NULL OR semantic_bibliographic_hash IS NULL "
+        "OR candidate_status IS NULL OR created_at IS NULL"
+    ).fetchone()
+    if before != after or (missing_row and missing_row[0]):
+        raise RuntimeError("metadata candidate version migration would lose provenance")
+
+
 def initialize_database(path: Path) -> None:
     with duckdb.connect(str(path)) as connection:
         connection.execute(files("evombl.storage").joinpath("schema.sql").read_text())
@@ -124,6 +180,8 @@ def migrate(path: Path) -> int:
                         raise RuntimeError("measurement count unavailable")
                     before = before_row[0]
                 connection.execute(sql)
+                if version == 7:
+                    _backfill_candidate_versions(connection)
                 if (
                     version == 3
                     and (

@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+from pydantic import BaseModel, ConfigDict
 
 from evombl.ingestion.rate_limit import load_rate_limits
 
@@ -18,6 +19,24 @@ EXPECTED_VARIANTS = {
     "VIM-2",
     "VIM-83",
 }
+
+
+class MetadataRetrievalPolicy(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    enabled: bool
+    official_apis_only: bool
+    preserve_raw_captures: bool
+    permit_scientific_promotion: bool
+    permit_activity_ingestion: bool
+    permit_pdf_download: bool
+    permit_publisher_scraping: bool
+    policy_version: str
+
+
+def load_metadata_policy(config_dir: Path) -> MetadataRetrievalPolicy:
+    return MetadataRetrievalPolicy.model_validate(
+        load_yaml(config_dir / "sources.yaml").get("metadata_retrieval")
+    )
 
 
 def load_yaml(path: Path) -> dict[str, Any]:
@@ -53,9 +72,24 @@ def validate_configuration(config_dir: Path) -> list[str]:
     endpoints = load_yaml(config_dir / "endpoints.yaml").get("endpoints")
     if not isinstance(endpoints, dict) or len(endpoints) != 14:
         errors.append("endpoints.yaml must define all 14 distinct endpoint types")
-    sources = load_yaml(config_dir / "sources.yaml")
-    if sources.get("retrieval_implemented") is not False:
-        errors.append("source retrieval must remain disabled in this baseline")
+    try:
+        policy = load_metadata_policy(config_dir)
+        if not policy.enabled or not policy.official_apis_only or not policy.preserve_raw_captures:
+            errors.append("metadata retrieval must use immutable official-API captures")
+        if (
+            policy.permit_scientific_promotion
+            or policy.permit_activity_ingestion
+            or policy.permit_pdf_download
+            or policy.permit_publisher_scraping
+        ):
+            errors.append("metadata retrieval policy enables a prohibited capability")
+    except Exception as exc:
+        errors.append(f"sources.yaml metadata policy: {exc}")
+    seeds = load_yaml(config_dir / "seed_sources.yaml").get("sources")
+    if not isinstance(seeds, list) or len(seeds) != 8:
+        errors.append("seed_sources.yaml must contain exactly eight candidates")
+    elif len({entry.get("seed_id") for entry in seeds}) != 8:
+        errors.append("seed source IDs must be unique")
     try:
         load_rate_limits(config_dir / "source_rate_limits.yaml")
     except Exception as exc:

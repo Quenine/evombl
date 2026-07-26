@@ -36,6 +36,7 @@ class MetadataCapture:
     response_hash: str
     response_path: Path
     payload: dict[str, Any]
+    retrieval_event_id: str
 
 
 class MetadataAdapter(Protocol):
@@ -145,7 +146,7 @@ class OfficialApiAdapter:
                 identifier, start, outcome, 1, digest=digest, path=old_target, offline=offline
             )
             self._persist(event)
-            return self._capture(identifier, raw, old_target)
+            return self._capture(identifier, raw, old_target, event.retrieval_id)
         if offline:
             error = RuntimeError("offline cache miss")
             self._persist(
@@ -279,9 +280,9 @@ class OfficialApiAdapter:
             )
         self._persist(event, revision)
         index.write_text(target.name, encoding="utf-8")
-        return self._capture(identifier, raw, target)
+        return self._capture(identifier, raw, target, event.retrieval_id)
 
-    def _capture(self, identifier: str, raw: bytes, target: Path) -> MetadataCapture:
+    def _capture(self, identifier: str, raw: bytes, target: Path, event_id: str) -> MetadataCapture:
         payload = json.loads(raw)
         return MetadataCapture(
             self.provider,
@@ -290,6 +291,7 @@ class OfficialApiAdapter:
             hashlib.sha256(raw).hexdigest(),
             target,
             payload,
+            event_id,
         )
 
 
@@ -304,7 +306,8 @@ class EuropePmcAdapter(OfficialApiAdapter):
     provider = "europe_pmc"
 
     def url(self, identifier: str) -> str:
-        return f"https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=DOI:{identifier}&format=json"
+        query = identifier if ":" in identifier else f"DOI:{identifier}"
+        return f"https://www.ebi.ac.uk/europepmc/webservices/rest/search?query={query}&format=json"
 
 
 class NcbiAdapter(OfficialApiAdapter):
@@ -312,6 +315,13 @@ class NcbiAdapter(OfficialApiAdapter):
 
     def url(self, identifier: str) -> str:
         return f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=protein&id={identifier}&retmode=json"
+
+
+class PubmedAdapter(OfficialApiAdapter):
+    provider = "ncbi_pubmed"
+
+    def url(self, identifier: str) -> str:
+        return f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id={identifier}&retmode=json"
 
 
 class RcsbPdbAdapter(OfficialApiAdapter):

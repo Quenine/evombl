@@ -16,3 +16,6 @@
 
 Future entries must include date, decision owner, alternatives, evidence, rationale,
 consequences, and review trigger.
+## Batch 2C1 — controlled metadata retrieval
+
+Adopted official-API-only staged retrieval with mandatory contact-email preflight, immutable captures, separate bibliographic statuses, deterministic comparison and relevance triage, and read-only registry verification. Publisher scraping, PDF download, activity ingestion, and scientific promotion remain disabled.
