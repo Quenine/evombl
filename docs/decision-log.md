@@ -12,6 +12,7 @@
 - Metadata retrieval remains separate from scientific verification.
 - Schema version 3 rebuilds measurements to enforce source-location provenance with a database foreign key.
 - Applied SQL migrations are immutable and checksum-validated.
+- The programme prioritises scientific progress over premature infrastructure completeness while governing every deferral in `docs/technical-debt.md`.
 
 Future entries must include date, decision owner, alternatives, evidence, rationale,
 consequences, and review trigger.

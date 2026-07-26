@@ -11,6 +11,17 @@
       ],
       "title": "SourceType",
       "type": "string"
+    },
+    "VerificationStatus": {
+      "enum": [
+        "unverified",
+        "identity_pending_verification",
+        "single_curator",
+        "dual_curator",
+        "source_verified"
+      ],
+      "title": "VerificationStatus",
+      "type": "string"
     }
   },
   "additionalProperties": false,
@@ -21,6 +32,10 @@
     },
     "source_type": {
       "$ref": "#/$defs/SourceType"
+    },
+    "verification_status": {
+      "$ref": "#/$defs/VerificationStatus",
+      "default": "unverified"
     },
     "title": {
       "anyOf": [

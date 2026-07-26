@@ -1,0 +1,7 @@
+configuration_version: source-rate-limits-v1
+providers:
+  crossref: {minimum_interval: 0.1, retry_count: 3, base_backoff: 0.5, maximum_backoff: 4.0, honor_retry_after: true}
+  europe_pmc: {minimum_interval: 0.1, retry_count: 3, base_backoff: 0.5, maximum_backoff: 4.0, honor_retry_after: true}
+  ncbi_no_key: {minimum_interval: 0.334, retry_count: 3, base_backoff: 0.5, maximum_backoff: 4.0, honor_retry_after: true}
+  ncbi_api_key: {minimum_interval: 0.1, retry_count: 3, base_backoff: 0.5, maximum_backoff: 4.0, honor_retry_after: true}
+  rcsb_pdb: {minimum_interval: 0.1, retry_count: 3, base_backoff: 0.5, maximum_backoff: 4.0, honor_retry_after: true}

@@ -34,12 +34,19 @@ class SourceRetrievalEventRecord(ImmutableRecord):
     retrieval_id: str
     source_id: str
     provider: str
-    accessed_at: datetime
+    requested_identifier: str
+    request_timestamp: datetime
+    completion_timestamp: datetime
     outcome: str = "success"
+    http_status: int | None = None
+    attempt_count: int
     response_hash: str | None = None
     response_path: Path | None = None
     error_type: str | None = None
     error_message: str | None = None
+    offline: bool = False
+    adapter_version: str
+    configuration_version: str
 
 
 class SourceRevisionRecord(ImmutableRecord):

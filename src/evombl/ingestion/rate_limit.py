@@ -1,21 +1,28 @@
 import time
 from collections.abc import Callable
-from dataclasses import dataclass
+from pathlib import Path
+
+import yaml
+from pydantic import BaseModel, ConfigDict, Field
 
 
-@dataclass(frozen=True)
-class RateLimitPolicy:
-    minimum_interval: float
-    max_attempts: int = 3
+class RateLimitPolicy(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    minimum_interval: float = Field(ge=0)
+    retry_count: int = Field(ge=1, le=10)
+    base_backoff: float = Field(ge=0)
+    maximum_backoff: float = Field(ge=0)
+    honor_retry_after: bool
 
 
-POLICIES = {
-    "crossref": RateLimitPolicy(0.1),
-    "europe_pmc": RateLimitPolicy(0.1),
-    "ncbi": RateLimitPolicy(1 / 3),
-    "ncbi_api_key": RateLimitPolicy(0.1),
-    "rcsb_pdb": RateLimitPolicy(0.1),
-}
+class RateLimitConfiguration(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    configuration_version: str
+    providers: dict[str, RateLimitPolicy]
+
+
+def load_rate_limits(path: Path = Path("config/source_rate_limits.yaml")) -> RateLimitConfiguration:
+    return RateLimitConfiguration.model_validate(yaml.safe_load(path.read_text(encoding="utf-8")))
 
 
 class RateLimiter:
@@ -40,9 +47,11 @@ class RateLimiter:
         self.last_request = self.clock()
 
 
-def policy_for(provider: str, *, ncbi_api_key: bool = False) -> RateLimitPolicy:
-    key = "ncbi_api_key" if provider == "ncbi" and ncbi_api_key else provider
+def policy_for(
+    configuration: RateLimitConfiguration, provider: str, *, ncbi_api_key: bool = False
+) -> RateLimitPolicy:
+    key = ("ncbi_api_key" if ncbi_api_key else "ncbi_no_key") if provider == "ncbi" else provider
     try:
-        return POLICIES[key]
+        return configuration.providers[key]
     except KeyError as exc:
-        raise ValueError(f"unknown rate-limit provider: {provider}") from exc
+        raise ValueError(f"missing rate-limit provider: {key}") from exc

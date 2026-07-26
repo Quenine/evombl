@@ -14,11 +14,19 @@ from evombl.domain import (
 )
 from evombl.domain.persistence import (
     CurationEventRecord,
+    MutationObservationRecord,
+    NumberingMappingRecord,
+    ProteinSequenceRecord,
+    ProteinStructureRecord,
     ProtocolRecord,
     SourceDocumentRecord,
     SourceFileRecord,
+    SourceIdentifierRecord,
     SourceRetrievalEventRecord,
     SourceRevisionRecord,
+    StructureChainRecord,
+    VariantAccessionRecord,
+    VariantSourceLinkRecord,
 )
 from evombl.domain.sources import SourceLocationRecord
 
@@ -269,24 +277,31 @@ class SourceRetrievalEventRepository:
                 return False
             raise ConflictingRecordError(r.retrieval_id)
         c.execute(
-            "INSERT INTO source_retrieval_events(retrieval_id,source_id,provider,accessed_at,outcome,response_hash,response_path,error_type,error_message) VALUES (?,?,?,?,?,?,?,?,?)",
+            "INSERT INTO source_retrieval_events(retrieval_id,source_id,provider,requested_identifier,request_timestamp,completion_timestamp,outcome,http_status,attempt_count,response_hash,response_path,error_type,error_message,offline,adapter_version,configuration_version) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
             [
                 r.retrieval_id,
                 r.source_id,
                 r.provider,
-                r.accessed_at,
+                r.requested_identifier,
+                r.request_timestamp,
+                r.completion_timestamp,
                 r.outcome,
+                r.http_status,
+                r.attempt_count,
                 r.response_hash,
                 str(r.response_path) if r.response_path else None,
                 r.error_type,
                 r.error_message,
+                r.offline,
+                r.adapter_version,
+                r.configuration_version,
             ],
         )
         return True
 
     def get(self, c: duckdb.DuckDBPyConnection, identifier: str) -> SourceRetrievalEventRecord:
         row = c.execute(
-            "SELECT retrieval_id,source_id,provider,accessed_at,outcome,response_hash,response_path,error_type,error_message FROM source_retrieval_events WHERE retrieval_id=?",
+            "SELECT retrieval_id,source_id,provider,requested_identifier,request_timestamp,completion_timestamp,outcome,http_status,attempt_count,response_hash,response_path,error_type,error_message,offline,adapter_version,configuration_version FROM source_retrieval_events WHERE retrieval_id=?",
             [identifier],
         ).fetchone()
         if row is None:
@@ -307,7 +322,7 @@ class SourceRetrievalEventRepository:
         return [
             self.get(c, row[0])
             for row in c.execute(
-                "SELECT retrieval_id FROM source_retrieval_events ORDER BY accessed_at,retrieval_id"
+                "SELECT retrieval_id FROM source_retrieval_events ORDER BY request_timestamp,retrieval_id"
             ).fetchall()
         ]
 
@@ -348,3 +363,180 @@ class SourceRevisionRepository:
                 "SELECT revision_id FROM source_revisions ORDER BY detected_at,revision_id"
             ).fetchall()
         ]
+
+
+class RelationalRepository[T: BaseModel]:
+    model: type[T]
+    identifier_field: str
+    fields: tuple[str, ...]
+    select_sql: str
+    list_sql: str
+    insert_sql: str
+
+    def get(self, c: duckdb.DuckDBPyConnection, identifier: str) -> T:
+        row = c.execute(self.select_sql, [identifier]).fetchone()
+        if row is None:
+            raise RecordNotFoundError(identifier)
+        return self.model.model_validate(dict(zip(self.fields, row, strict=True)))
+
+    def exists(self, c: duckdb.DuckDBPyConnection, identifier: str) -> bool:
+        try:
+            self.get(c, identifier)
+            return True
+        except RecordNotFoundError:
+            return False
+
+    def list(self, c: duckdb.DuckDBPyConnection) -> builtins.list[T]:
+        return [
+            self.model.model_validate(dict(zip(self.fields, row, strict=True)))
+            for row in c.execute(self.list_sql).fetchall()
+        ]
+
+    def insert(self, c: duckdb.DuckDBPyConnection, r: T) -> bool:
+        identifier = str(getattr(r, self.identifier_field))
+        if self.exists(c, identifier):
+            if self.get(c, identifier) == r:
+                return False
+            raise ConflictingRecordError(identifier)
+        data = r.model_dump(mode="python")
+        c.execute(self.insert_sql, [data[field] for field in self.fields])
+        return True
+
+
+class SourceIdentifierRepository(RelationalRepository[SourceIdentifierRecord]):
+    model = SourceIdentifierRecord
+    identifier_field = "identifier_id"
+    fields = ("identifier_id", "source_id", "scheme", "value")
+    select_sql = (
+        "SELECT identifier_id,source_id,scheme,value FROM source_identifiers WHERE identifier_id=?"
+    )
+    list_sql = (
+        "SELECT identifier_id,source_id,scheme,value FROM source_identifiers ORDER BY identifier_id"
+    )
+    insert_sql = (
+        "INSERT INTO source_identifiers(identifier_id,source_id,scheme,value) VALUES (?,?,?,?)"
+    )
+
+
+class ProteinSequenceRepository(RelationalRepository[ProteinSequenceRecord]):
+    model = ProteinSequenceRecord
+    identifier_field = "sequence_id"
+    fields = (
+        "sequence_id",
+        "variant_id",
+        "source_id",
+        "sequence_kind",
+        "sequence_hash",
+        "sequence",
+    )
+    select_sql = "SELECT sequence_id,variant_id,source_id,sequence_kind,sequence_hash,sequence FROM protein_sequences WHERE sequence_id=?"
+    list_sql = "SELECT sequence_id,variant_id,source_id,sequence_kind,sequence_hash,sequence FROM protein_sequences ORDER BY sequence_id"
+    insert_sql = "INSERT INTO protein_sequences(sequence_id,variant_id,source_id,sequence_kind,sequence_hash,sequence) VALUES (?,?,?,?,?,?)"
+
+
+class VariantAccessionRepository(RelationalRepository[VariantAccessionRecord]):
+    model = VariantAccessionRecord
+    identifier_field = "accession_id"
+    fields = (
+        "accession_id",
+        "variant_id",
+        "accession",
+        "accession_type",
+        "source_database",
+        "verification_status",
+    )
+    select_sql = "SELECT accession_id,variant_id,accession,accession_type,source_database,verification_status FROM variant_accessions WHERE accession_id=?"
+    list_sql = "SELECT accession_id,variant_id,accession,accession_type,source_database,verification_status FROM variant_accessions ORDER BY accession_id"
+    insert_sql = "INSERT INTO variant_accessions(accession_id,variant_id,accession,accession_type,source_database,verification_status) VALUES (?,?,?,?,?,?)"
+
+
+class VariantSourceLinkRepository:
+    def get(self, c: duckdb.DuckDBPyConnection, identifier: str) -> VariantSourceLinkRecord:
+        parts = identifier.split("|", 1)
+        if len(parts) != 2:
+            raise RecordNotFoundError(identifier)
+        row = c.execute(
+            "SELECT variant_id,source_id FROM variant_source_links WHERE variant_id=? AND source_id=?",
+            parts,
+        ).fetchone()
+        if row is None:
+            raise RecordNotFoundError(identifier)
+        return VariantSourceLinkRecord(variant_id=row[0], source_id=row[1])
+
+    def exists(self, c: duckdb.DuckDBPyConnection, identifier: str) -> bool:
+        try:
+            self.get(c, identifier)
+            return True
+        except RecordNotFoundError:
+            return False
+
+    def list(self, c: duckdb.DuckDBPyConnection) -> builtins.list[VariantSourceLinkRecord]:
+        return [
+            VariantSourceLinkRecord(variant_id=row[0], source_id=row[1])
+            for row in c.execute(
+                "SELECT variant_id,source_id FROM variant_source_links ORDER BY variant_id,source_id"
+            ).fetchall()
+        ]
+
+    def insert(self, c: duckdb.DuckDBPyConnection, r: VariantSourceLinkRecord) -> bool:
+        identifier = f"{r.variant_id}|{r.source_id}"
+        if self.exists(c, identifier):
+            return False
+        c.execute(
+            "INSERT INTO variant_source_links(variant_id,source_id) VALUES (?,?)",
+            [r.variant_id, r.source_id],
+        )
+        return True
+
+
+class MutationObservationRepository(RelationalRepository[MutationObservationRecord]):
+    model = MutationObservationRecord
+    identifier_field = "observation_id"
+    fields = (
+        "observation_id",
+        "variant_id",
+        "reference_sequence_hash",
+        "author_mutation",
+        "author_numbering",
+        "bbl_numbering",
+        "verification_status",
+    )
+    select_sql = "SELECT observation_id,variant_id,reference_sequence_hash,author_mutation,author_numbering,bbl_numbering,verification_status FROM mutation_observations WHERE observation_id=?"
+    list_sql = "SELECT observation_id,variant_id,reference_sequence_hash,author_mutation,author_numbering,bbl_numbering,verification_status FROM mutation_observations ORDER BY observation_id"
+    insert_sql = "INSERT INTO mutation_observations(observation_id,variant_id,reference_sequence_hash,author_mutation,author_numbering,bbl_numbering,verification_status) VALUES (?,?,?,?,?,?,?)"
+
+
+class NumberingMappingRepository(RelationalRepository[NumberingMappingRecord]):
+    model = NumberingMappingRecord
+    identifier_field = "mapping_id"
+    fields = ("mapping_id", "observation_id", "method", "verified")
+    select_sql = "SELECT mapping_id,observation_id,method,verified FROM numbering_mappings WHERE mapping_id=?"
+    list_sql = "SELECT mapping_id,observation_id,method,verified FROM numbering_mappings ORDER BY mapping_id"
+    insert_sql = (
+        "INSERT INTO numbering_mappings(mapping_id,observation_id,method,verified) VALUES (?,?,?,?)"
+    )
+
+
+class ProteinStructureRepository(RelationalRepository[ProteinStructureRecord]):
+    model = ProteinStructureRecord
+    identifier_field = "structure_id"
+    fields = ("structure_id", "variant_id", "source_id", "database_id", "verification_status")
+    select_sql = "SELECT structure_id,variant_id,source_id,database_id,verification_status FROM protein_structures WHERE structure_id=?"
+    list_sql = "SELECT structure_id,variant_id,source_id,database_id,verification_status FROM protein_structures ORDER BY structure_id"
+    insert_sql = "INSERT INTO protein_structures(structure_id,variant_id,source_id,database_id,verification_status) VALUES (?,?,?,?,?)"
+
+
+class StructureChainRepository(RelationalRepository[StructureChainRecord]):
+    model = StructureChainRecord
+    identifier_field = "chain_id"
+    fields = (
+        "chain_id",
+        "structure_id",
+        "chain_label",
+        "construct_start",
+        "construct_end",
+        "sequence_hash",
+    )
+    select_sql = "SELECT chain_id,structure_id,chain_label,construct_start,construct_end,sequence_hash FROM structure_chains WHERE chain_id=?"
+    list_sql = "SELECT chain_id,structure_id,chain_label,construct_start,construct_end,sequence_hash FROM structure_chains ORDER BY chain_id"
+    insert_sql = "INSERT INTO structure_chains(chain_id,structure_id,chain_label,construct_start,construct_end,sequence_hash) VALUES (?,?,?,?,?,?)"

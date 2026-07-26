@@ -3,6 +3,8 @@ from typing import Any
 
 import yaml
 
+from evombl.ingestion.rate_limit import load_rate_limits
+
 EXPECTED_VARIANTS = {
     "IMP-1",
     "IMP-6",
@@ -54,4 +56,8 @@ def validate_configuration(config_dir: Path) -> list[str]:
     sources = load_yaml(config_dir / "sources.yaml")
     if sources.get("retrieval_implemented") is not False:
         errors.append("source retrieval must remain disabled in this baseline")
+    try:
+        load_rate_limits(config_dir / "source_rate_limits.yaml")
+    except Exception as exc:
+        errors.append(f"source_rate_limits.yaml: {exc}")
     return errors

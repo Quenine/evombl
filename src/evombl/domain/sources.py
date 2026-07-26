@@ -4,13 +4,14 @@ from datetime import date
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from .enums import SourceType
+from .enums import SourceType, VerificationStatus
 
 
 class EvidenceSourceRecord(BaseModel):
     model_config = ConfigDict(extra="forbid")
     source_id: str
     source_type: SourceType
+    verification_status: VerificationStatus = VerificationStatus.UNVERIFIED
     title: str | None = None
     authors: list[str] = Field(default_factory=list)
     year: int | None = None
