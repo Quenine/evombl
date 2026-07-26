@@ -35,6 +35,7 @@ from evombl.ingestion.bibliographic import (
 from evombl.ingestion.metadata import CrossrefAdapter, EuropePmcAdapter, PubmedAdapter
 from evombl.proteins.sequences import normalize_sequence, sequence_hash
 from evombl.provenance.manifests import write_manifest
+from evombl.scientific_extraction import build_outputs, validate_and_report
 from evombl.settings import Settings
 from evombl.storage.database import (
     initialize_database,
@@ -49,6 +50,35 @@ from evombl.storage.database import (
 from evombl.storage.repositories import EvidenceSourceRepository, stable_hash, stable_json
 
 app = typer.Typer(help="EvoMBL evidence infrastructure.")
+
+
+@app.command("validate-scientific-extraction")
+def validate_scientific_extraction(
+    input_path: Path = Path("data/curated/pilot/papers-001-003/measurements.csv"),
+    parquet_path: Path = Path("data/curated/pilot/papers-001-003/measurements.parquet"),
+    report_path: Path = Path("reports/batch-3a/measurement-qc.csv"),
+) -> None:
+    try:
+        count = validate_and_report(input_path, parquet_path, report_path)
+    except ValueError as exc:
+        typer.echo(str(exc), err=True)
+        raise typer.Exit(1) from exc
+    typer.echo(f"Scientific extraction valid: {count} observations")
+
+
+@app.command("build-evidence-matrix")
+def build_evidence_matrix(
+    input_path: Path = Path("data/curated/pilot/papers-001-003/measurements.csv"),
+    matrix_path: Path = Path("reports/batch-3a/variant-inhibitor-evidence.csv"),
+    summary_path: Path = Path("reports/batch-3a/assay-context-summary.csv"),
+    readiness_path: Path = Path("reports/batch-3a/readiness.md"),
+) -> None:
+    try:
+        rows, columns = build_outputs(input_path, matrix_path, summary_path, readiness_path)
+    except ValueError as exc:
+        typer.echo(str(exc), err=True)
+        raise typer.Exit(1) from exc
+    typer.echo(f"Evidence matrix written: {rows} rows x {columns} columns")
 
 
 @app.command("migrate")

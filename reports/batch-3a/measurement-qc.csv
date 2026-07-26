@@ -1,0 +1,17 @@
+observation_id,validation_status,quality_flags
+EVO-OBS-P1-001,valid,
+EVO-OBS-P1-002,valid,
+EVO-OBS-P1-003,valid,
+EVO-OBS-P1-004,valid,
+EVO-OBS-P1-005,valid,
+EVO-OBS-P1-006,valid,
+EVO-OBS-P1-007,valid,
+EVO-OBS-P2-001,valid,
+EVO-OBS-P2-002,valid,
+EVO-OBS-P2-003,valid,
+EVO-OBS-P2-004,valid,
+EVO-OBS-P2-005,valid,
+EVO-OBS-P2-006,valid,
+EVO-OBS-P3-001,valid,
+EVO-OBS-P3-002,valid,censored_with_reported_fitted_estimate
+EVO-OBS-P3-003,valid,
