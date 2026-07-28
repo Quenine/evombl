@@ -18,7 +18,7 @@ SOURCE = Path("data/curated/pilot/papers-001-003/measurements.csv")
 
 def test_all_pilot_records_validate_and_contexts_remain_separate() -> None:
     rows = load_observations(SOURCE)
-    assert len(rows) == 16
+    assert len(rows) == 43
     censored = next(row for row in rows if row.observation_id == "EVO-OBS-P1-004")
     fitted = next(row for row in rows if row.observation_id == "EVO-OBS-P3-002")
     assert (censored.relation, censored.value) == (">", "100")
@@ -77,8 +77,8 @@ def test_matrix_is_deterministic_and_performs_no_averaging(tmp_path: Path) -> No
     first = tmp_path / "first.csv"
     second = tmp_path / "second.csv"
     args = (tmp_path / "summary.csv", tmp_path / "readiness.md")
-    assert build_outputs(SOURCE, first, *args) == (16, 20)
-    assert build_outputs(SOURCE, second, *args) == (16, 20)
+    assert build_outputs(SOURCE, first, *args) == (43, 20)
+    assert build_outputs(SOURCE, second, *args) == (43, 20)
     assert first.read_bytes() == second.read_bytes()
     rows = list(csv.DictReader(first.open(encoding="utf-8")))
     ndm9_tan = [

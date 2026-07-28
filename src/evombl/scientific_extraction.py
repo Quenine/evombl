@@ -218,9 +218,9 @@ def build_outputs(source: Path, matrix: Path, summary: Path, readiness: Path) ->
     )
     readiness.parent.mkdir(parents=True, exist_ok=True)
     readiness.write_text(
-        "# Batch 3A readiness\n\n"
-        "- This is a 16-observation pilot.\n"
-        "- This is not complete paper extraction.\n"
+        "# Batch 3B1 readiness\n\n"
+        "- This dataset contains 43 observations.\n"
+        "- Paper 1 Table 2 is completely transcribed; Papers 1–3 remain otherwise incomplete.\n"
         "- This dataset is not ready for modelling.\n"
         "- Protein identities and mutations remain paper-reported, not independently verified.\n"
         "- No hit or lead claims are permitted.\n",
