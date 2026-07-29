@@ -51,7 +51,7 @@ def _table2() -> list[object]:
 
 def test_paper1_table2_is_complete_and_each_variant_occurs_once() -> None:
     rows = _table2()
-    assert len(load_observations(SOURCE)) == 43
+    assert len(load_observations(SOURCE)) == 109
     assert len(rows) == 32
     assert Counter(row.source_row_label for row in rows) == Counter(EXPECTED_LABELS)
     assert all(row.directness == "direct_table_value" for row in rows)
@@ -80,6 +80,19 @@ def test_engineered_variants_retain_supplied_metadata() -> None:
 
 
 def test_existing_non_table2_observations_remain_unchanged() -> None:
+    original_ids = {
+        "EVO-OBS-P1-006",
+        "EVO-OBS-P1-007",
+        "EVO-OBS-P2-001",
+        "EVO-OBS-P2-002",
+        "EVO-OBS-P2-003",
+        "EVO-OBS-P2-004",
+        "EVO-OBS-P2-005",
+        "EVO-OBS-P2-006",
+        "EVO-OBS-P3-001",
+        "EVO-OBS-P3-002",
+        "EVO-OBS-P3-003",
+    }
     rows = {
         row.observation_id: (
             row.source_doi,
@@ -94,7 +107,7 @@ def test_existing_non_table2_observations_remain_unchanged() -> None:
             row.fitted_value,
         )
         for row in load_observations(SOURCE)
-        if row.source_table != "Table 2"
+        if row.observation_id in original_ids
     }
     assert rows == {
         "EVO-OBS-P1-006": (
