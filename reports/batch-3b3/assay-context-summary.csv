@@ -1,0 +1,5 @@
+assay_category,assay_system,protein_preparation,endpoint,observation_count
+antimicrobial_susceptibility,whole_cell,,MIC,2
+biochemical_inhibition,crude_extract,recombinant_E_coli_crude_extract,IC50,62
+biochemical_inhibition,crude_extract,recombinant_E_coli_crude_lysate,IC50,70
+biochemical_inhibition,purified_enzyme,purified_recombinant_enzyme,Ki,8

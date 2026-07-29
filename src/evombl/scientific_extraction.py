@@ -218,14 +218,15 @@ def build_outputs(source: Path, matrix: Path, summary: Path, readiness: Path) ->
     )
     readiness.parent.mkdir(parents=True, exist_ok=True)
     readiness.write_text(
-        "# Batch 3B2 readiness\n\n"
-        "- Paper 2 Table 3 has been completely transcribed.\n"
-        "- Paired XER/TAN evidence exists for 35 variants.\n"
-        "- These data remain assay-specific crude-lysate IC50 measurements.\n"
-        "- No cross-paper averaging has occurred.\n"
-        "- Papers 1–3 remain incompletely extracted.\n"
-        "- Sequence identities remain unverified.\n"
-        "- Modelling is not yet authorised.\n",
+        "# Batch 3B3 readiness\n\n"
+        "- Paper 2 Table 4 and Paper 3 Table 3 have been completely transcribed.\n"
+        "- Paper 3 Table 3 contains 30 source observations; these must not be described as 30 independent experiments.\n"
+        "- Ten Paper 3 source observations are explicitly flagged prior-study republications.\n"
+        "- The remaining source observations are preserved without independently verifying experimental independence.\n"
+        "- Other paper tables remain incompletely extracted.\n"
+        "- Protein identities and mutation numbering remain unverified.\n"
+        "- Modelling is not authorised.\n"
+        "- No hit or lead claims are permitted.\n",
         encoding="utf-8",
     )
     return len(observations), len(EVIDENCE_FIELDS)

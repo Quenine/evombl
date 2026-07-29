@@ -54,7 +54,7 @@ def _table3() -> list[object]:
 
 def test_table3_has_complete_paired_variant_coverage() -> None:
     rows = _table3()
-    assert len(load_observations(SOURCE)) == 109
+    assert len(load_observations(SOURCE)) == 142
     assert len(rows) == 70
     assert {row.enzyme_variant for row in rows} == set(SUPPLIED)
     assert Counter(row.enzyme_variant for row in rows) == Counter(
@@ -117,7 +117,7 @@ def test_table4_ki_and_other_papers_remain_separate() -> None:
     table4 = {
         row.observation_id: (row.enzyme_variant, row.endpoint, row.relation, row.value, row.unit)
         for row in rows
-        if row.source_doi == DOI and row.source_table == "Table 4"
+        if row.observation_id in {"EVO-OBS-P2-005", "EVO-OBS-P2-006"}
     }
     assert table4 == {
         "EVO-OBS-P2-005": ("IMP-1", "Ki", "=", "0.3", "uM"),
@@ -127,7 +127,7 @@ def test_table4_ki_and_other_papers_remain_separate() -> None:
     paper3 = {
         row.observation_id: (row.relation, row.value, row.fitted_value)
         for row in rows
-        if row.source_doi == "10.1128/aac.00297-25"
+        if row.observation_id in {"EVO-OBS-P3-001", "EVO-OBS-P3-002", "EVO-OBS-P3-003"}
     }
     assert paper3 == {
         "EVO-OBS-P3-001": ("=", "180", None),

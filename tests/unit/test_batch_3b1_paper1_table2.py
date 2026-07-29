@@ -51,7 +51,7 @@ def _table2() -> list[object]:
 
 def test_paper1_table2_is_complete_and_each_variant_occurs_once() -> None:
     rows = _table2()
-    assert len(load_observations(SOURCE)) == 109
+    assert len(load_observations(SOURCE)) == 142
     assert len(rows) == 32
     assert Counter(row.source_row_label for row in rows) == Counter(EXPECTED_LABELS)
     assert all(row.directness == "direct_table_value" for row in rows)
