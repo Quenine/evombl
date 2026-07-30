@@ -1,0 +1,4 @@
+reference_variant,comparison_variant,difference_count,observed_difference,coordinate_system,paper_reported_mutation,paper_numbering_scheme,verification_result
+IMP-1,IMP-6,1,S214G,full_length_precursor_1_based,Ser262Gly,BBL,verified
+IMP-1,IMP-10,1,V49F,full_length_precursor_1_based,Val67Phe,BBL,verified
+IMP-4,IMP-26,1,V49F,full_length_precursor_1_based,Val67Phe,BBL,verified

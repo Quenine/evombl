@@ -33,6 +33,7 @@ from evombl.ingestion.bibliographic import (
     triage,
 )
 from evombl.ingestion.metadata import CrossrefAdapter, EuropePmcAdapter, PubmedAdapter
+from evombl.proteins.identity_registry import verify_identity_registry
 from evombl.proteins.sequences import normalize_sequence, sequence_hash
 from evombl.provenance.manifests import write_manifest
 from evombl.scientific_extraction import build_outputs, validate_and_report
@@ -50,6 +51,25 @@ from evombl.storage.database import (
 from evombl.storage.repositories import EvidenceSourceRepository, stable_hash, stable_json
 
 app = typer.Typer(help="EvoMBL evidence infrastructure.")
+
+
+@app.command("verify-imp-identity-registry")
+def verify_imp_identity_registry(
+    registry_path: Path = Path("data/curated/identities/imp_escape_core/identity_registry.csv"),
+    fasta_path: Path = Path("data/curated/identities/imp_escape_core/sequences.fasta"),
+    report_dir: Path = Path("reports/batch-3c1a"),
+) -> None:
+    try:
+        identities, sequences, comparisons = verify_identity_registry(
+            registry_path, fasta_path, report_dir
+        )
+    except ValueError as exc:
+        typer.echo(str(exc), err=True)
+        raise typer.Exit(1) from exc
+    typer.echo(
+        f"IMP identity registry valid: {identities} identities, "
+        f"{sequences} sequences, {comparisons} comparisons"
+    )
 
 
 @app.command("validate-scientific-extraction")
