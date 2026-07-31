@@ -1,0 +1,6 @@
+variant_name,claim_scope,source_kind,locator_presence,doi_presence,validation_status,curator_note
+IMP-2,original_allele_and_nucleotide_accession,primary_article,present,present,valid,
+IMP-2,protein_accession_and_sequence_payload,curated_database,present,not_applicable,valid,
+IMP-2,accession_and_length_crosscheck,curated_database,present,not_applicable,valid,
+IMP-19,original_allele_nucleotide_accession_and_relationship,primary_article,present,present,valid,Article reports Arg38Ala relative to IMP-2 using the Galleni numbering scheme.
+IMP-19,protein_accession_and_length_crosscheck,curated_database,present,not_applicable,valid,

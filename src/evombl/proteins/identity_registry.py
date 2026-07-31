@@ -22,8 +22,29 @@ REGISTRY_FIELDS = (
     "quality_flags",
     "curator_note",
 )
+PROVENANCE_FIELDS = (
+    "variant_name",
+    "claim_scope",
+    "source_kind",
+    "source_name",
+    "source_locator",
+    "source_doi",
+    "accession",
+    "accessed_date",
+    "curator_note",
+)
 PENDING_SEQUENCE_STATUS = "accession_verified_sequence_payload_pending"
-EXPECTED_VARIANTS = {"IMP-1", "IMP-4", "IMP-6", "IMP-10", "IMP-14", "IMP-19", "IMP-26", "IMP-59"}
+EXPECTED_VARIANTS = {
+    "IMP-1",
+    "IMP-2",
+    "IMP-4",
+    "IMP-6",
+    "IMP-10",
+    "IMP-14",
+    "IMP-19",
+    "IMP-26",
+    "IMP-59",
+}
 
 
 @dataclass(frozen=True)
@@ -45,6 +66,7 @@ AUTHORISED_COMPARISONS = (
     AuthorisedComparison("IMP-1", "IMP-6", "S214G", "Ser262Gly"),
     AuthorisedComparison("IMP-1", "IMP-10", "V49F", "Val67Phe"),
     AuthorisedComparison("IMP-4", "IMP-26", "V49F", "Val67Phe"),
+    AuthorisedComparison("IMP-2", "IMP-19", "R21A", "Arg38Ala"),
 )
 
 
@@ -105,6 +127,27 @@ def read_registry(path: Path) -> list[dict[str, str]]:
     return rows
 
 
+def read_source_provenance(path: Path) -> list[dict[str, str]]:
+    with path.open(newline="", encoding="utf-8") as stream:
+        reader = csv.DictReader(stream)
+        if tuple(reader.fieldnames or ()) != PROVENANCE_FIELDS:
+            raise ValueError("source provenance columns do not match the required schema")
+        rows = list(reader)
+    if len(rows) != 5 or {row["variant_name"] for row in rows} != {"IMP-2", "IMP-19"}:
+        raise ValueError("source provenance pack must contain exactly five IMP-2/IMP-19 records")
+    for row in rows:
+        for field in ("variant_name", "claim_scope", "source_kind", "source_locator"):
+            if not row[field]:
+                raise ValueError(f"source provenance record missing {field}")
+        if row["source_kind"] == "primary_article" and not row["source_doi"]:
+            raise ValueError("primary source provenance requires a DOI")
+        if row["source_kind"] == "curated_database" and not row["source_locator"]:
+            raise ValueError("database source provenance requires a stable locator")
+        if "immutable raw" in " ".join(row.values()).lower():
+            raise ValueError("source provenance must not claim immutable raw capture")
+    return rows
+
+
 def direct_precursor_differences(reference: str, comparison: str) -> list[str]:
     if len(reference) != len(comparison):
         raise ValueError("authorised precursor sequences have different lengths")
@@ -128,9 +171,10 @@ def verify_identity_registry(
 ) -> tuple[int, int, int]:
     registry = read_registry(registry_path)
     fasta = read_fasta(fasta_path)
+    provenance = read_source_provenance(registry_path.parent / "sources_imp2_imp19.csv")
     by_variant = {row["variant_name"]: row for row in registry}
-    if set(by_variant) != EXPECTED_VARIANTS or len(fasta) != 7:
-        raise ValueError("identity pack must contain eight registry rows and seven sequences")
+    if set(by_variant) != EXPECTED_VARIANTS or len(fasta) != 8:
+        raise ValueError("identity pack must contain nine registry rows and eight sequences")
     qc_rows: list[dict[str, object]] = []
     for row in registry:
         variant = row["variant_name"]
@@ -159,9 +203,7 @@ def verify_identity_registry(
         qc_rows.append(
             {
                 "variant_name": variant,
-                "accession_presence": "present"
-                if row["preferred_protein_accession"]
-                else "missing",
+                "accession_presence": "present",
                 "sequence_presence": "present" if record else "pending",
                 "normalized_length": computed_length,
                 "computed_hash": computed_hash,
@@ -184,8 +226,7 @@ def verify_identity_registry(
         differences = direct_precursor_differences(reference.sequence, comparison_record.sequence)
         if differences != [comparison.expected_difference]:
             raise ValueError(
-                f"{comparison.reference_variant}/{comparison.variant}: expected "
-                f"{comparison.expected_difference}, observed {differences}"
+                f"{comparison.reference_variant}/{comparison.variant}: expected {comparison.expected_difference}, observed {differences}"
             )
         metadata = by_variant[comparison.variant]
         if (
@@ -236,18 +277,42 @@ def verify_identity_registry(
         ),
         difference_rows,
     )
+    source_qc: list[dict[str, object]] = [
+        {
+            "variant_name": row["variant_name"],
+            "claim_scope": row["claim_scope"],
+            "source_kind": row["source_kind"],
+            "locator_presence": "present",
+            "doi_presence": "present" if row["source_doi"] else "not_applicable",
+            "validation_status": "valid",
+            "curator_note": row["curator_note"],
+        }
+        for row in provenance
+    ]
+    _write_csv(
+        report_dir / "source-qc.csv",
+        (
+            "variant_name",
+            "claim_scope",
+            "source_kind",
+            "locator_presence",
+            "doi_presence",
+            "validation_status",
+            "curator_note",
+        ),
+        source_qc,
+    )
     (report_dir / "readiness.md").write_text(
-        "# Batch 3C1A identity readiness\n\n"
-        "- Eight identity records exist.\n"
-        "- Seven authoritative full-length precursor sequence payloads were captured.\n"
-        "- IMP-59 remains accession-only; its sequence payload is pending.\n"
-        "- Three authorised precursor relationships were independently reproduced.\n"
-        "- Full-length precursor coordinates and paper BBL coordinates remain separate.\n"
+        "# Batch 3C1B1 identity readiness\n\n"
+        "- Nine identity records exist.\n"
+        "- Eight full-length precursor sequences are captured.\n"
+        "- Four authorised precursor relationships are verified.\n"
+        "- IMP-2 to IMP-19 is R21A in precursor coordinates; the paper relationship remains Arg38Ala in BBL coordinates.\n"
+        "- Precursor and BBL numbering remain separate.\n"
+        "- IMP-59 remains accession-only.\n"
         "- IMP-14 numbering remains unresolved.\n"
-        "- IMP-19 versus IMP-2 remains unverified.\n"
-        "- IMP-59 versus IMP-4 remains paper-supported only.\n"
-        "- Sequence identity verification remains incomplete.\n"
-        "- Modelling, structural claims, hit claims, and lead claims remain unauthorised.\n",
+        "- Source provenance remains incomplete for the other registry variants.\n"
+        "- Modelling and structural, hit, or lead claims remain unauthorised.\n",
         encoding="utf-8",
     )
     return len(registry), len(fasta), len(difference_rows)

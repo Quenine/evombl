@@ -1,0 +1,6 @@
+variant_name,claim_scope,source_kind,source_name,source_locator,source_doi,accession,accessed_date,curator_note
+IMP-2,original_allele_and_nucleotide_accession,primary_article,Antimicrobial Agents and Chemotherapy,original IMP-2 characterization,10.1128/AAC.44.5.1229-1235.2000,AJ243491,2026-07-30,
+IMP-2,protein_accession_and_sequence_payload,curated_database,CARD,ARO:38593,,CAB94707.1,2026-07-30,
+IMP-2,accession_and_length_crosscheck,curated_database,KEGG,br01553,,CAB94707|AJ243491,2026-07-30,
+IMP-19,original_allele_nucleotide_accession_and_relationship,primary_article,Antimicrobial Agents and Chemotherapy,original IMP-19 characterization,10.1128/AAC.01462-06,EF118171,2026-07-30,Article reports Arg38Ala relative to IMP-2 using the Galleni numbering scheme.
+IMP-19,protein_accession_and_length_crosscheck,curated_database,KEGG,br01553,,ABM67078|EF118171,2026-07-30,
