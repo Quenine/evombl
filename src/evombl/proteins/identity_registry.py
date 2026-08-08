@@ -1,4 +1,5 @@
 import csv
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -34,6 +35,16 @@ PROVENANCE_FIELDS = (
     "curator_note",
 )
 PENDING_SEQUENCE_STATUS = "accession_verified_sequence_payload_pending"
+REFERENCE_SEQUENCE_MISSING_FLAG = "reference_sequence_not_in_pack"
+VERIFIED_PRECURSOR_STATUS = "precursor_difference_verified"
+RELATIONSHIP_TERMS = ("relationship", "comparison", "precursor difference")
+CONTRADICTORY_NOTE_PATTERNS = (
+    r"cannot be independently checked",
+    r"cannot be checked",
+    r"remains pending",
+    r"remains unverified",
+    r"has not been independently verified",
+)
 EXPECTED_VARIANTS = {
     "IMP-1",
     "IMP-2",
@@ -148,6 +159,49 @@ def read_source_provenance(path: Path) -> list[dict[str, str]]:
     return rows
 
 
+def _normalise_note(note: str) -> str:
+    return re.sub(r"\s+", " ", note.casefold()).strip()
+
+
+def _verified_note_contradicts_status(note: str) -> bool:
+    normalized = _normalise_note(note)
+    if not normalized:
+        return False
+    relation_pattern = "|".join(re.escape(term) for term in RELATIONSHIP_TERMS)
+    contradiction_pattern = "|".join(CONTRADICTORY_NOTE_PATTERNS)
+    return bool(
+        re.search(
+            rf"(?:{relation_pattern}).{{0,100}}(?:{contradiction_pattern})|"
+            rf"(?:{contradiction_pattern}).{{0,100}}(?:{relation_pattern})",
+            normalized,
+        )
+    )
+
+
+def _validate_metadata_relationships(
+    registry: list[dict[str, str]], fasta: dict[str, FastaRecord]
+) -> None:
+    by_variant = {row["variant_name"]: row for row in registry}
+    for row in registry:
+        flags = row["quality_flags"].split("|") if row["quality_flags"] else []
+        reference = by_variant.get(row["reference_variant"])
+        if (
+            any(REFERENCE_SEQUENCE_MISSING_FLAG in flag for flag in flags)
+            and reference is not None
+            and reference["sequence_status"] == "sequence_captured"
+            and reference["variant_name"] in fasta
+        ):
+            raise ValueError(
+                f"{row['variant_name']}: reference sequence missing flag contradicts captured reference"
+            )
+        if VERIFIED_PRECURSOR_STATUS in row[
+            "verification_status"
+        ] and _verified_note_contradicts_status(row["curator_note"]):
+            raise ValueError(
+                f"{row['variant_name']}: curator note contradicts verified precursor difference"
+            )
+
+
 def direct_precursor_differences(reference: str, comparison: str) -> list[str]:
     if len(reference) != len(comparison):
         raise ValueError("authorised precursor sequences have different lengths")
@@ -175,6 +229,7 @@ def verify_identity_registry(
     by_variant = {row["variant_name"]: row for row in registry}
     if set(by_variant) != EXPECTED_VARIANTS or len(fasta) != 8:
         raise ValueError("identity pack must contain nine registry rows and eight sequences")
+    _validate_metadata_relationships(registry, fasta)
     qc_rows: list[dict[str, object]] = []
     for row in registry:
         variant = row["variant_name"]

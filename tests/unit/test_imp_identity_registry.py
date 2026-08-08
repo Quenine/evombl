@@ -46,6 +46,77 @@ def test_imp59_remains_the_only_pending_sequence() -> None:
     assert registry["IMP-59"]["full_length_sequence_sha256"] == ""
 
 
+def test_corrected_imp14_and_imp19_metadata_passes(tmp_path: Path) -> None:
+    registry = {row["variant_name"]: row for row in read_registry(REGISTRY)}
+    assert registry["IMP-14"]["quality_flags"] == "imp14_numbering_discrepancy_unresolved"
+    assert "imp2_reference_sequence_not_in_pack" not in registry["IMP-14"]["quality_flags"]
+    assert registry["IMP-19"]["curator_note"] == (
+        "The IMP-2 relationship was independently reproduced as R21A in full-length "
+        "precursor coordinates; the paper-reported Arg38Ala BBL label is retained separately."
+    )
+    assert verify_identity_registry(REGISTRY, FASTA, tmp_path / "reports") == (9, 8, 4)
+
+
+def test_captured_reference_missing_flag_fails(tmp_path: Path) -> None:
+    registry, fasta, _ = _copy_pack(tmp_path)
+    with registry.open(newline="", encoding="utf-8") as stream:
+        reader = csv.DictReader(stream)
+        fields = reader.fieldnames
+        rows = list(reader)
+    for row in rows:
+        if row["variant_name"] == "IMP-14":
+            row["quality_flags"] = "imp2_reference_sequence_not_in_pack"
+    with registry.open("w", newline="", encoding="utf-8") as stream:
+        writer = csv.DictWriter(stream, fieldnames=fields, lineterminator="\n")
+        writer.writeheader()
+        writer.writerows(rows)
+    with pytest.raises(ValueError, match="reference sequence missing flag"):
+        verify_identity_registry(registry, fasta, tmp_path / "reports")
+
+
+def test_reference_missing_flag_is_allowed_when_reference_is_pending(tmp_path: Path) -> None:
+    registry, fasta, _ = _copy_pack(tmp_path)
+    with registry.open(newline="", encoding="utf-8") as stream:
+        reader = csv.DictReader(stream)
+        fields = reader.fieldnames
+        rows = list(reader)
+    for row in rows:
+        if row["variant_name"] == "IMP-59":
+            row["reference_variant"] = "IMP-59"
+            row["quality_flags"] = "reference_sequence_not_in_pack"
+    with registry.open("w", newline="", encoding="utf-8") as stream:
+        writer = csv.DictWriter(stream, fieldnames=fields, lineterminator="\n")
+        writer.writeheader()
+        writer.writerows(rows)
+    assert verify_identity_registry(registry, fasta, tmp_path / "reports") == (9, 8, 4)
+
+
+def test_verified_precursor_note_contradiction_fails(tmp_path: Path) -> None:
+    registry, fasta, _ = _copy_pack(tmp_path)
+    with registry.open(newline="", encoding="utf-8") as stream:
+        reader = csv.DictReader(stream)
+        fields = reader.fieldnames
+        rows = list(reader)
+    for row in rows:
+        if row["variant_name"] == "IMP-19":
+            row["curator_note"] = "The relationship cannot be independently checked."
+    with registry.open("w", newline="", encoding="utf-8") as stream:
+        writer = csv.DictWriter(stream, fieldnames=fields, lineterminator="\n")
+        writer.writeheader()
+        writer.writerows(rows)
+    with pytest.raises(ValueError, match="curator note contradicts"):
+        verify_identity_registry(registry, fasta, tmp_path / "reports")
+
+
+def test_protected_sequences_and_sources_are_unchanged() -> None:
+    assert hashlib.sha256(FASTA.read_bytes()).hexdigest() == (
+        "2c5308fb21b4318292cf177559f8cdcebbe63c14b872b743bb4474fbce007b30"
+    )
+    assert hashlib.sha256(SOURCES.read_bytes()).hexdigest() == (
+        "8f698692c0d3ebf91c65793ce086816c45d63516f3d897b7cdc05741b3aacbfa"
+    )
+
+
 def test_all_four_authorised_differences_and_paper_labels_are_separate() -> None:
     fasta = read_fasta(FASTA)
     observed = {
