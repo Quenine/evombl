@@ -1,0 +1,10 @@
+variant_name,claim_scope,source_kind,locator_presence,doi_presence,validation_status,curator_note
+IMP-2,original_allele_and_nucleotide_accession,primary_article,present,present,valid,
+IMP-2,protein_accession_and_sequence_payload,curated_database,present,not_applicable,valid,
+IMP-2,accession_and_length_crosscheck,curated_database,present,not_applicable,valid,
+IMP-19,original_allele_nucleotide_accession_and_relationship,primary_article,present,present,valid,Article reports Arg38Ala relative to IMP-2 using the Galleni numbering scheme.
+IMP-19,protein_accession_and_length_crosscheck,curated_database,present,not_applicable,valid,
+IMP-59,protein_accession_and_sequence_payload,curated_database,present,not_applicable,valid,Complete FASTA was manually copied from the NCBI protein record by the curator and normalized only for repository FASTA formatting; this is not an immutable raw database capture.
+IMP-59,nucleotide_accession_crosscheck,secondary_article,present,present,valid,Review table associates IMP-59 from Escherichia coli in Australia with both nucleotide accessions.
+IMP-59,paper_reported_imp4_relationship,primary_article,present,present,valid,Article reports that IMP-59 differs from IMP-4 by the single BBL-numbered substitution Asn233Tyr.
+IMP-59,protein_accession_used_for_homology_model,primary_article,present,present,valid,Article explicitly identifies WP_094009805.1 as the NCBI Identical Proteins reference sequence used for IMP-59 modeling.

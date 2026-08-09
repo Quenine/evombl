@@ -78,6 +78,7 @@ AUTHORISED_COMPARISONS = (
     AuthorisedComparison("IMP-1", "IMP-10", "V49F", "Val67Phe"),
     AuthorisedComparison("IMP-4", "IMP-26", "V49F", "Val67Phe"),
     AuthorisedComparison("IMP-2", "IMP-19", "R21A", "Arg38Ala"),
+    AuthorisedComparison("IMP-4", "IMP-59", "N185Y", "Asn233Tyr"),
 )
 
 
@@ -144,18 +145,44 @@ def read_source_provenance(path: Path) -> list[dict[str, str]]:
         if tuple(reader.fieldnames or ()) != PROVENANCE_FIELDS:
             raise ValueError("source provenance columns do not match the required schema")
         rows = list(reader)
-    if len(rows) != 5 or {row["variant_name"] for row in rows} != {"IMP-2", "IMP-19"}:
-        raise ValueError("source provenance pack must contain exactly five IMP-2/IMP-19 records")
+    pack_expectations = {
+        "sources_imp2_imp19.csv": (5, {"IMP-2", "IMP-19"}),
+        "sources_imp59.csv": (4, {"IMP-59"}),
+    }
+    try:
+        expected_count, expected_variants = pack_expectations[path.name]
+    except KeyError as exc:
+        raise ValueError(f"unsupported source provenance pack: {path.name}") from exc
+    if len(rows) != expected_count or {row["variant_name"] for row in rows} != expected_variants:
+        raise ValueError(f"source provenance pack has invalid cardinality or variants: {path.name}")
+    seen: set[tuple[str, str, str, str]] = set()
     for row in rows:
-        for field in ("variant_name", "claim_scope", "source_kind", "source_locator"):
+        for field in (
+            "variant_name",
+            "claim_scope",
+            "source_kind",
+            "source_name",
+            "source_locator",
+            "accessed_date",
+        ):
             if not row[field]:
                 raise ValueError(f"source provenance record missing {field}")
-        if row["source_kind"] == "primary_article" and not row["source_doi"]:
-            raise ValueError("primary source provenance requires a DOI")
+        if row["source_kind"] in {"primary_article", "secondary_article"} and not row["source_doi"]:
+            raise ValueError("article source provenance requires a DOI")
         if row["source_kind"] == "curated_database" and not row["source_locator"]:
             raise ValueError("database source provenance requires a stable locator")
-        if "immutable raw" in " ".join(row.values()).lower():
-            raise ValueError("source provenance must not claim immutable raw capture")
+            provenance_text = " ".join(row.values()).lower()
+            if "immutable raw" in provenance_text and "not an immutable raw" not in provenance_text:
+                raise ValueError("source provenance must not claim immutable raw capture")
+        identity = (
+            row["variant_name"],
+            row["claim_scope"],
+            row["source_kind"],
+            row["source_locator"],
+        )
+        if identity in seen:
+            raise ValueError("duplicate source provenance record")
+        seen.add(identity)
     return rows
 
 
@@ -226,9 +253,10 @@ def verify_identity_registry(
     registry = read_registry(registry_path)
     fasta = read_fasta(fasta_path)
     provenance = read_source_provenance(registry_path.parent / "sources_imp2_imp19.csv")
+    provenance.extend(read_source_provenance(registry_path.parent / "sources_imp59.csv"))
     by_variant = {row["variant_name"]: row for row in registry}
-    if set(by_variant) != EXPECTED_VARIANTS or len(fasta) != 8:
-        raise ValueError("identity pack must contain nine registry rows and eight sequences")
+    if set(by_variant) != EXPECTED_VARIANTS or len(fasta) != 9:
+        raise ValueError("identity pack must contain nine registry rows and nine sequences")
     _validate_metadata_relationships(registry, fasta)
     qc_rows: list[dict[str, object]] = []
     for row in registry:
@@ -358,15 +386,17 @@ def verify_identity_registry(
         source_qc,
     )
     (report_dir / "readiness.md").write_text(
-        "# Batch 3C1B1 identity readiness\n\n"
+        "# Batch 3C1B2 identity readiness\n\n"
         "- Nine identity records exist.\n"
-        "- Eight full-length precursor sequences are captured.\n"
-        "- Four authorised precursor relationships are verified.\n"
+        "- Nine full-length precursor sequences are captured.\n"
+        "- Five authorised precursor relationships are independently verified.\n"
         "- IMP-2 to IMP-19 is R21A in precursor coordinates; the paper relationship remains Arg38Ala in BBL coordinates.\n"
+        "- IMP-4 to IMP-59 is N185Y in full-length precursor coordinates; the corresponding published relationship remains Asn233Tyr in BBL coordinates.\n"
         "- Precursor and BBL numbering remain separate.\n"
-        "- IMP-59 remains accession-only.\n"
+        "- IMP-59 is no longer sequence-pending.\n"
         "- IMP-14 numbering remains unresolved.\n"
-        "- Source provenance remains incomplete for the other registry variants.\n"
+        "- Source provenance remains incomplete for the other escape-core variants.\n"
+        "- No general BBL mapping has been inferred.\n"
         "- Modelling and structural, hit, or lead claims remain unauthorised.\n",
         encoding="utf-8",
     )
