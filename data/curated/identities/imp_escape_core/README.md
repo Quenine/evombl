@@ -19,3 +19,10 @@ coordinates or mature sequences were generated.
 for the other escape-core variants. The authorised full-length precursor comparisons are
 IMP-1/IMP-6, IMP-1/IMP-10, IMP-4/IMP-26, IMP-2/IMP-19, and IMP-4/IMP-59. No general BBL mapping is
 inferred from these relationships.
+
+The five Paper 3 IMP-14 engineered mutants have a dedicated adjudication layer in
+`imp14_engineered_mutants.csv` and `imp14_mutagenesis_primers.csv`. Table S1 primers establish
+precursor-level identities without silently correcting publication labels: the N185Y-labelled
+supplement row primer encodes Y185N, Table 2 Y233N is consistent with that result, and Table 3
+N233Y remains the literal Table 3 label. The N178S/Asn177Ser discrepancy is retained. No global
+BBL offset is assumed.

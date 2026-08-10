@@ -1,0 +1,6 @@
+mutant_id,wild_type_residue,wild_type_window,translated_mutant_window,difference_count,inferred_precursor_mutation,validation_status
+IMP14-MUT-01,S,KGWSVVTK,KGWGVVTK,1,S47G,valid
+IMP14-MUT-02,H,QAKHSFN,QAKNSFN,1,H134N,valid
+IMP14-MUT-03,N,HSFNGVSY,HSFSGVSY,1,N137S,valid
+IMP14-MUT-04,D,VKPDGLGYL,VKPYGLGYL,1,D181Y,valid
+IMP14-MUT-05,Y,GLGYLGD,GLGNLGD,1,Y185N,valid

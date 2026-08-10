@@ -1,4 +1,6 @@
 import csv
+import hashlib
+import json
 import re
 from dataclasses import dataclass
 from pathlib import Path
@@ -34,6 +36,59 @@ PROVENANCE_FIELDS = (
     "accessed_date",
     "curator_note",
 )
+ENGINEERED_MUTANT_FIELDS = (
+    "mutant_id",
+    "reference_variant",
+    "source_doi",
+    "table2_bbl_label",
+    "table3_bbl_label",
+    "narrative_label",
+    "supplement_label",
+    "precursor_mutation",
+    "adjudicated_bbl_label",
+    "adjudication_status",
+    "quality_flags",
+    "curator_note",
+)
+PRIMER_FIELDS = (
+    "mutant_id",
+    "supplement_label",
+    "forward_primer",
+    "reverse_primer",
+    "translated_mutant_window",
+    "wild_type_window",
+    "inferred_precursor_mutation",
+    "source_doi",
+    "source_locator",
+    "evidence_status",
+    "curator_note",
+)
+IMP14_MUTATION_IDS = {
+    "IMP14-MUT-01",
+    "IMP14-MUT-02",
+    "IMP14-MUT-03",
+    "IMP14-MUT-04",
+    "IMP14-MUT-05",
+}
+IMP14_PRECURSOR_MUTATIONS = {"S47G", "H134N", "N137S", "D181Y", "Y185N"}
+MEASUREMENT_METADATA_IDS = {f"EVO-OBS-P3-{number:03d}" for number in range(16, 26)}
+NUMERIC_EVIDENCE_FIELDS = (
+    "observation_id",
+    "value",
+    "relation",
+    "fitted_value",
+    "unit",
+    "compound",
+    "endpoint",
+    "assay_system",
+    "directness",
+    "replicate_count",
+    "fixed_inhibitor_concentration",
+    "fixed_inhibitor_concentration_unit",
+    "antibiotic_partner",
+)
+NUMERIC_EVIDENCE_HASH = "88e9ab488c7491f9fe64db8afd21719d1d793fc6e22e4de294c32a498478d5f6"
+NON_TARGET_MEASUREMENTS_HASH = "6b8e0e4b25a46b049ccdfc5122abaac90a2196aa214457e66e8ba178e1cec333"
 PENDING_SEQUENCE_STATUS = "accession_verified_sequence_payload_pending"
 REFERENCE_SEQUENCE_MISSING_FLAG = "reference_sequence_not_in_pack"
 VERIFIED_PRECURSOR_STATUS = "precursor_difference_verified"
@@ -171,9 +226,9 @@ def read_source_provenance(path: Path) -> list[dict[str, str]]:
             raise ValueError("article source provenance requires a DOI")
         if row["source_kind"] == "curated_database" and not row["source_locator"]:
             raise ValueError("database source provenance requires a stable locator")
-            provenance_text = " ".join(row.values()).lower()
-            if "immutable raw" in provenance_text and "not an immutable raw" not in provenance_text:
-                raise ValueError("source provenance must not claim immutable raw capture")
+        provenance_text = " ".join(row.values()).lower()
+        if "immutable raw" in provenance_text and "not an immutable raw" not in provenance_text:
+            raise ValueError("source provenance must not claim immutable raw capture")
         identity = (
             row["variant_name"],
             row["claim_scope"],
@@ -184,6 +239,180 @@ def read_source_provenance(path: Path) -> list[dict[str, str]]:
             raise ValueError("duplicate source provenance record")
         seen.add(identity)
     return rows
+
+
+def _read_required_csv(path: Path, fields: tuple[str, ...]) -> list[dict[str, str]]:
+    with path.open(newline="", encoding="utf-8") as stream:
+        reader = csv.DictReader(stream)
+        if tuple(reader.fieldnames or ()) != fields:
+            raise ValueError(f"{path.name}: columns do not match the required schema")
+        rows = list(reader)
+    if any(not all(value is not None for value in row.values()) for row in rows):
+        raise ValueError(f"{path.name}: row has unexpected fields")
+    return rows
+
+
+def read_imp14_engineered_mutants(path: Path) -> list[dict[str, str]]:
+    rows = _read_required_csv(path, ENGINEERED_MUTANT_FIELDS)
+    if {row["mutant_id"] for row in rows} != IMP14_MUTATION_IDS or len(rows) != 5:
+        raise ValueError("IMP-14 engineered-mutant dataset must contain five unique rows")
+    if any(row["reference_variant"] != "IMP-14" for row in rows):
+        raise ValueError("IMP-14 engineered mutants must reference IMP-14")
+    if any(row["source_doi"] != "10.1128/aac.00297-25" for row in rows):
+        raise ValueError("IMP-14 engineered mutants have an unexpected source DOI")
+    return rows
+
+
+def read_imp14_mutagenesis_primers(path: Path) -> list[dict[str, str]]:
+    rows = _read_required_csv(path, PRIMER_FIELDS)
+    if {row["mutant_id"] for row in rows} != IMP14_MUTATION_IDS or len(rows) != 5:
+        raise ValueError("IMP-14 primer dataset must contain five unique rows")
+    if any(row["source_doi"] != "10.1128/aac.00297-25.SuF3" for row in rows):
+        raise ValueError("IMP-14 primers have an unexpected source DOI")
+    if any(row["source_locator"] != "Table S1" for row in rows):
+        raise ValueError("IMP-14 primers must be located in Table S1")
+    return rows
+
+
+def _validate_imp14_mutagenesis(
+    mutants: list[dict[str, str]], primers: list[dict[str, str]], imp14_sequence: str
+) -> list[dict[str, object]]:
+    by_id = {row["mutant_id"]: row for row in mutants}
+    primer_by_id = {row["mutant_id"]: row for row in primers}
+    if set(by_id) != set(primer_by_id):
+        raise ValueError("IMP-14 adjudication and primer mutant IDs disagree")
+    qc_rows: list[dict[str, object]] = []
+    inferred: set[str] = set()
+    for mutant_id in sorted(IMP14_MUTATION_IDS):
+        primer = primer_by_id[mutant_id]
+        mutant = by_id[mutant_id]
+        wild_type = primer["wild_type_window"]
+        translated = primer["translated_mutant_window"]
+        start = imp14_sequence.find(wild_type)
+        if start < 0 or imp14_sequence.find(wild_type, start + 1) >= 0:
+            raise ValueError(f"{mutant_id}: wild-type window is not uniquely present in IMP-14")
+        differences = [
+            index
+            for index, (left, right) in enumerate(zip(wild_type, translated, strict=True))
+            if left != right
+        ]
+        if len(wild_type) != len(translated) or len(differences) != 1:
+            raise ValueError(f"{mutant_id}: primer window must encode exactly one substitution")
+        difference = differences[0]
+        precursor = f"{wild_type[difference]}{start + difference + 1}{translated[difference]}"
+        if (
+            precursor != primer["inferred_precursor_mutation"]
+            or precursor != mutant["precursor_mutation"]
+        ):
+            raise ValueError(
+                f"{mutant_id}: primer-derived precursor mutation disagrees with curation"
+            )
+        inferred.add(precursor)
+        qc_rows.append(
+            {
+                "mutant_id": mutant_id,
+                "wild_type_residue": wild_type[difference],
+                "wild_type_window": wild_type,
+                "translated_mutant_window": translated,
+                "difference_count": 1,
+                "inferred_precursor_mutation": precursor,
+                "validation_status": "valid",
+            }
+        )
+    if inferred != IMP14_PRECURSOR_MUTATIONS:
+        raise ValueError("IMP-14 primer-derived precursor mutation set is incorrect")
+    mut03 = by_id["IMP14-MUT-03"]
+    if (mut03["table2_bbl_label"], mut03["table3_bbl_label"], mut03["narrative_label"]) != (
+        "N178S",
+        "N178S",
+        "Asn177Ser",
+    ):
+        raise ValueError("IMP14-MUT-03 source discrepancy must be preserved")
+    mut05 = by_id["IMP14-MUT-05"]
+    if (
+        mut05["table2_bbl_label"],
+        mut05["table3_bbl_label"],
+        mut05["supplement_label"],
+        mut05["precursor_mutation"],
+    ) != ("Y233N", "N233Y", "IMP-14 N185Y", "Y185N"):
+        raise ValueError("IMP14-MUT-05 source labels or primer adjudication were altered")
+    return qc_rows
+
+
+def _measurement_hash(rows: list[dict[str, str]]) -> str:
+    canonical = json.dumps(rows, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(canonical.encode()).hexdigest()
+
+
+def _validate_measurement_metadata(path: Path) -> list[dict[str, object]]:
+    with path.open(newline="", encoding="utf-8") as stream:
+        rows = list(csv.DictReader(stream))
+    if len(rows) != 142:
+        raise ValueError("scientific measurement count must remain 142")
+    numeric = [{field: row[field] for field in NUMERIC_EVIDENCE_FIELDS} for row in rows]
+    if _measurement_hash(numeric) != NUMERIC_EVIDENCE_HASH:
+        raise ValueError("scientific numeric evidence changed")
+    non_target = [row for row in rows if row["observation_id"] not in MEASUREMENT_METADATA_IDS]
+    if _measurement_hash(non_target) != NON_TARGET_MEASUREMENTS_HASH:
+        raise ValueError("a non-target scientific measurement row changed")
+    target = {
+        row["observation_id"]: row
+        for row in rows
+        if row["observation_id"] in MEASUREMENT_METADATA_IDS
+    }
+    if set(target) != MEASUREMENT_METADATA_IDS:
+        raise ValueError("IMP-14 measurement metadata target rows are incomplete")
+    for observation_id, row in target.items():
+        expected_label = {
+            "EVO-OBS-P3-016": "S65G",
+            "EVO-OBS-P3-017": "S65G",
+            "EVO-OBS-P3-018": "H174N",
+            "EVO-OBS-P3-019": "H174N",
+            "EVO-OBS-P3-020": "N178S",
+            "EVO-OBS-P3-021": "N178S",
+            "EVO-OBS-P3-022": "D227Y",
+            "EVO-OBS-P3-023": "D227Y",
+            "EVO-OBS-P3-024": "N233Y",
+            "EVO-OBS-P3-025": "N233Y",
+        }[observation_id]
+        if (
+            row["source_row_label"] != f"IMP-14 {expected_label}"
+            or row["author_reported_mutation"] != expected_label
+        ):
+            raise ValueError(f"{observation_id}: literal Table 3 mutation label changed")
+        if observation_id in {"EVO-OBS-P3-024", "EVO-OBS-P3-025"}:
+            if row["quality_flags"] != "source_mutation_label_conflict_adjudicated":
+                raise ValueError(f"{observation_id}: source-label conflict flag is required")
+            if (
+                row["source_row_label"] != "IMP-14 N233Y"
+                or row["author_reported_mutation"] != "N233Y"
+            ):
+                raise ValueError(f"{observation_id}: Table 3 source text must be retained")
+            for phrase in (
+                "Table S1 row label literally reports N185Y",
+                "encodes Y185N",
+                "Table 2 reports Y233N",
+            ):
+                if phrase not in row["curator_note"]:
+                    raise ValueError(
+                        f"{observation_id}: source conflict adjudication is incomplete"
+                    )
+        elif row["quality_flags"] != "mutation_identity_adjudicated_from_table_s1":
+            raise ValueError(f"{observation_id}: Table S1 adjudication flag is required")
+    for observation_id in ("EVO-OBS-P3-020", "EVO-OBS-P3-021"):
+        for phrase in ("N137S", "N178S", "Asn177Ser", "conflict is preserved"):
+            if phrase not in target[observation_id]["curator_note"]:
+                raise ValueError(f"{observation_id}: N178S/N177S conflict note is incomplete")
+    return [
+        {
+            "observation_count_before": 142,
+            "observation_count_after": 142,
+            "allowed_metadata_changes": 10,
+            "numeric_value_relation_fitted_unit_compound_endpoint_changes": 0,
+            "non_target_row_changes": 0,
+            "validation_status": "valid",
+        }
+    ]
 
 
 def _normalise_note(note: str) -> str:
@@ -258,6 +487,12 @@ def verify_identity_registry(
     if set(by_variant) != EXPECTED_VARIANTS or len(fasta) != 9:
         raise ValueError("identity pack must contain nine registry rows and nine sequences")
     _validate_metadata_relationships(registry, fasta)
+    mutants = read_imp14_engineered_mutants(registry_path.parent / "imp14_engineered_mutants.csv")
+    primers = read_imp14_mutagenesis_primers(registry_path.parent / "imp14_mutagenesis_primers.csv")
+    primer_qc = _validate_imp14_mutagenesis(mutants, primers, fasta["IMP-14"].sequence)
+    measurement_qc = _validate_measurement_metadata(
+        Path("data/curated/pilot/papers-001-003/measurements.csv")
+    )
     qc_rows: list[dict[str, object]] = []
     for row in registry:
         variant = row["variant_name"]
@@ -331,6 +566,56 @@ def verify_identity_registry(
                 "verification_result": "verified",
             }
         )
+
+    if report_dir.name == "batch-3c1c":
+        mutagenesis_report_rows: list[dict[str, object]] = [
+            {field: row[field] for field in ENGINEERED_MUTANT_FIELDS} for row in mutants
+        ]
+        _write_csv(
+            report_dir / "imp14-mutagenesis-adjudication.csv",
+            ENGINEERED_MUTANT_FIELDS,
+            mutagenesis_report_rows,
+        )
+        _write_csv(
+            report_dir / "imp14-primer-qc.csv",
+            (
+                "mutant_id",
+                "wild_type_residue",
+                "wild_type_window",
+                "translated_mutant_window",
+                "difference_count",
+                "inferred_precursor_mutation",
+                "validation_status",
+            ),
+            primer_qc,
+        )
+        _write_csv(
+            report_dir / "measurement-metadata-qc.csv",
+            (
+                "observation_count_before",
+                "observation_count_after",
+                "allowed_metadata_changes",
+                "numeric_value_relation_fitted_unit_compound_endpoint_changes",
+                "non_target_row_changes",
+                "validation_status",
+            ),
+            measurement_qc,
+        )
+        (report_dir / "readiness.md").write_text(
+            "# Batch 3C1C IMP-14 mutagenesis readiness\n\n"
+            "- All five IMP-14 engineered precursor mutations are adjudicated.\n"
+            "- S47G, H134N, N137S, D181Y, and Y185N are the primer-supported full-length precursor changes.\n"
+            "- Table-supported BBL labels are S65G, H174N, N178S, D227Y, and Y233N.\n"
+            "- N178S versus narrative N177S remains documented as a source discrepancy.\n"
+            "- Table 3 N233Y and supplement-label N185Y remain preserved as source discrepancies.\n"
+            "- The Mutant 5 primer supports Y185N.\n"
+            "- No universal BBL mapping was inferred.\n"
+            "- 142 measurement observations remain and numerical IC50 evidence is unchanged.\n"
+            "- IMP-14 is suitable for mutation-aware descriptive analysis with documented provenance caveats.\n"
+            "- Structural or mechanistic causal claims remain unauthorised.\n",
+            encoding="utf-8",
+        )
+        return len(registry), len(fasta), len(difference_rows)
 
     _write_csv(
         report_dir / "identity-qc.csv",
