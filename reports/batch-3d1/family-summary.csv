@@ -1,0 +1,12 @@
+source_doi,enzyme_family,pair_count,exact_ratio_count,lower_bound_ratio_count,upper_bound_ratio_count,indeterminate_ratio_count,tan_ic50_gt_xer_supported_count,tan_ic50_lt_xer_supported_count,equal_count,direction_unresolved_count,prior_study_republication_pair_count,not_marked_as_prior_study_republication_pair_count
+10.1128/aac.00297-25,IMP,13,2,10,0,1,10,2,0,1,4,9
+10.1128/aac.00297-25,NDM,2,1,0,0,1,0,1,0,1,1,1
+10.1128/aac.01570-23,AIM,1,0,0,0,1,0,0,0,1,0,1
+10.1128/aac.01570-23,DIM,1,1,0,0,0,0,1,0,0,0,1
+10.1128/aac.01570-23,GIM,1,1,0,0,0,0,1,0,0,0,1
+10.1128/aac.01570-23,IMP,10,0,10,0,0,10,0,0,0,0,10
+10.1128/aac.01570-23,NDM,11,11,0,0,0,5,6,0,0,0,11
+10.1128/aac.01570-23,PFM,1,0,0,0,1,0,0,0,1,0,1
+10.1128/aac.01570-23,SIM,1,0,1,0,0,1,0,0,0,0,1
+10.1128/aac.01570-23,SPM,1,0,0,1,0,0,1,0,0,0,1
+10.1128/aac.01570-23,VIM,8,8,0,0,0,8,0,0,0,0,8

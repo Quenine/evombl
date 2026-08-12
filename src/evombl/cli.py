@@ -9,6 +9,7 @@ import typer
 import yaml
 from pydantic import BaseModel
 
+from evombl.analysis.paired_inhibitors import run_paired_ic50_analysis
 from evombl.chemistry.standardize import standardize_smiles
 from evombl.configuration import load_metadata_policy, load_yaml, validate_configuration
 from evombl.domain import (
@@ -99,6 +100,27 @@ def build_evidence_matrix(
         typer.echo(str(exc), err=True)
         raise typer.Exit(1) from exc
     typer.echo(f"Evidence matrix written: {rows} rows x {columns} columns")
+
+
+@app.command("analyze-paired-ic50")
+def analyze_paired_ic50(
+    input_path: Path = Path("data/curated/pilot/papers-001-003/measurements.csv"),
+    imp14_adjudication_path: Path = Path(
+        "data/curated/identities/imp_escape_core/imp14_engineered_mutants.csv"
+    ),
+    report_dir: Path = Path("reports/batch-3d1"),
+) -> None:
+    try:
+        observations, pairs, republications = run_paired_ic50_analysis(
+            input_path, imp14_adjudication_path, report_dir
+        )
+    except ValueError as exc:
+        typer.echo(str(exc), err=True)
+        raise typer.Exit(1) from exc
+    typer.echo(
+        f"Paired IC50 analysis valid: {observations} observations, {pairs} pairs, "
+        f"{republications} republished Paper 3 pairs"
+    )
 
 
 @app.command("migrate")
