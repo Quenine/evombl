@@ -1,0 +1,2 @@
+source_doi,variant_count,source_observation_count,crude_pair_count,ki_pair_count,crude_exact_ratio_count,crude_lower_bound_ratio_count,ki_exact_ratio_count,ki_lower_bound_ratio_count,direction_concordant_count,direction_discordant_count,direction_unresolved_count,cross_endpoint_ratio_count,inferential_test_count
+10.1128/aac.01570-23,4,16,4,4,2,2,2,2,4,0,0,0,0

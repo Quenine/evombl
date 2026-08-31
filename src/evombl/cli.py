@@ -9,6 +9,7 @@ import typer
 import yaml
 from pydantic import BaseModel
 
+from evombl.analysis.assay_context import run_assay_context_bridge
 from evombl.analysis.paired_inhibitors import run_paired_ic50_analysis
 from evombl.chemistry.standardize import standardize_smiles
 from evombl.configuration import load_metadata_policy, load_yaml, validate_configuration
@@ -120,6 +121,22 @@ def analyze_paired_ic50(
     typer.echo(
         f"Paired IC50 analysis valid: {observations} observations, {pairs} pairs, "
         f"{republications} republished Paper 3 pairs"
+    )
+
+
+@app.command("analyze-assay-context-bridge")
+def analyze_assay_context_bridge(
+    input_path: Path = Path("data/curated/pilot/papers-001-003/measurements.csv"),
+    report_dir: Path = Path("reports/batch-3d2"),
+) -> None:
+    try:
+        observations, variants, concordant = run_assay_context_bridge(input_path, report_dir)
+    except ValueError as exc:
+        typer.echo(str(exc), err=True)
+        raise typer.Exit(1) from exc
+    typer.echo(
+        f"Assay-context bridge valid: {observations} observations, {variants} variants, "
+        f"{concordant} direction-concordant"
     )
 
 

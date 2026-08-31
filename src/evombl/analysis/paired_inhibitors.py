@@ -109,7 +109,11 @@ def _formatted_ratio(value: Decimal) -> str:
     return f"{value:.6f}"
 
 
-def _ratio_fields(xer: ScientificObservation, tan: ScientificObservation) -> dict[str, str]:
+def derive_censor_aware_ratio(
+    xer: ScientificObservation,
+    tan: ScientificObservation,
+    direction_prefix: str = "ic50",
+) -> dict[str, str]:
     if xer.relation not in SUPPORTED_RELATIONS or tan.relation not in SUPPORTED_RELATIONS:
         raise ValueError("Batch 3D1 supports only '=' and '>' relations")
     xer_value = Decimal(xer.value)
@@ -139,18 +143,22 @@ def _ratio_fields(xer: ScientificObservation, tan: ScientificObservation) -> dic
     if ratio_class == "exact":
         assert ratio is not None
         direction = (
-            "tan_ic50_gt_xer_supported"
+            f"tan_{direction_prefix}_gt_xer_supported"
             if ratio > 1
-            else "tan_ic50_lt_xer_supported"
+            else f"tan_{direction_prefix}_lt_xer_supported"
             if ratio < 1
             else "equal"
         )
     elif ratio_class == "lower_bound":
         assert ratio is not None
-        direction = "tan_ic50_gt_xer_supported" if ratio > 1 else "direction_unresolved"
+        direction = (
+            f"tan_{direction_prefix}_gt_xer_supported" if ratio > 1 else "direction_unresolved"
+        )
     elif ratio_class == "upper_bound":
         assert ratio is not None
-        direction = "tan_ic50_lt_xer_supported" if ratio < 1 else "direction_unresolved"
+        direction = (
+            f"tan_{direction_prefix}_lt_xer_supported" if ratio < 1 else "direction_unresolved"
+        )
     else:
         direction = "direction_unresolved"
     return {
@@ -164,6 +172,10 @@ def _ratio_fields(xer: ScientificObservation, tan: ScientificObservation) -> dic
         "log2_ratio_upper_bound": log2_upper,
         "direction_class": direction,
     }
+
+
+def _ratio_fields(xer: ScientificObservation, tan: ScientificObservation) -> dict[str, str]:
+    return derive_censor_aware_ratio(xer, tan)
 
 
 def _pair_directness(xer: ScientificObservation, tan: ScientificObservation) -> str:

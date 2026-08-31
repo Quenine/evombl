@@ -20,6 +20,8 @@ REGISTRY = ROOT / "identity_registry.csv"
 FASTA = ROOT / "sequences.fasta"
 SOURCES = ROOT / "sources_imp2_imp19.csv"
 SOURCES_IMP59 = ROOT / "sources_imp59.csv"
+IMP14_MUTANTS = ROOT / "imp14_engineered_mutants.csv"
+IMP14_PRIMERS = ROOT / "imp14_mutagenesis_primers.csv"
 
 
 def test_registry_fasta_counts_and_imp2_payload() -> None:
@@ -59,8 +61,8 @@ def test_no_sequence_is_pending_and_imp59_metadata_is_complete() -> None:
 
 def test_corrected_imp14_and_imp19_metadata_passes(tmp_path: Path) -> None:
     registry = {row["variant_name"]: row for row in read_registry(REGISTRY)}
-    assert registry["IMP-14"]["quality_flags"] == "imp14_numbering_discrepancy_unresolved"
-    assert "imp2_reference_sequence_not_in_pack" not in registry["IMP-14"]["quality_flags"]
+    assert registry["IMP-14"]["quality_flags"] == "imp14_source_numbering_conflicts_documented"
+    assert "imp14_numbering_discrepancy_unresolved" not in registry["IMP-14"]["quality_flags"]
     assert registry["IMP-19"]["curator_note"] == (
         "The IMP-2 relationship was independently reproduced as R21A in full-length "
         "precursor coordinates; the paper-reported Arg38Ala BBL label is retained separately."
@@ -189,6 +191,8 @@ def _copy_pack(tmp_path: Path) -> tuple[Path, Path, Path]:
     shutil.copyfile(FASTA, fasta)
     shutil.copyfile(SOURCES, sources)
     shutil.copyfile(SOURCES_IMP59, tmp_path / "sources_imp59.csv")
+    shutil.copyfile(IMP14_MUTANTS, tmp_path / "imp14_engineered_mutants.csv")
+    shutil.copyfile(IMP14_PRIMERS, tmp_path / "imp14_mutagenesis_primers.csv")
     return registry, fasta, sources
 
 
@@ -247,11 +251,11 @@ def test_reports_are_deterministic_and_measurements_are_unchanged(tmp_path: Path
     measurements = Path("data/curated/pilot/papers-001-003")
     assert (
         hashlib.sha256((measurements / "measurements.csv").read_bytes()).hexdigest()
-        == "e44ff1f49d95ad32160b721345445b6f271ebf46327c022b74cc0a5a05ba6b1c"
+        == "0ea4f6fc6b28e97342cb1378fe0b9f6f084d43775fe2bacd3759ec39aa9d7139"
     )
     assert (
         hashlib.sha256((measurements / "measurements.parquet").read_bytes()).hexdigest()
-        == "df72f529f885d8d4df382f8ffeac63e26c79e33dbd10e0315cbe59f2d2f42a86"
+        == "c7400aebcd1ddb2c9df7c733e86b55f86224ec0c13957266c6051021d1452c57"
     )
 
 

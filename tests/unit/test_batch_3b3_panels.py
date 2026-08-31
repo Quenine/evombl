@@ -88,9 +88,21 @@ def test_imp14_censoring_fitted_value_and_mutation_warnings() -> None:
     assert (baseline.relation, baseline.value, baseline.fitted_value) == (">", "250", "680")
     mutants = [row for row in rows if row.enzyme_variant.startswith("IMP-14 ")]
     assert len(mutants) == 10
-    assert all(
-        row.quality_flags == "mutation_numbering_requires_sequence_verification" for row in mutants
-    )
+    assert {
+        row.quality_flags
+        for row in mutants
+        if row.observation_id not in {"EVO-OBS-P3-024", "EVO-OBS-P3-025"}
+    } == {"mutation_identity_adjudicated_from_table_s1"}
+    assert {
+        row.quality_flags
+        for row in mutants
+        if row.observation_id in {"EVO-OBS-P3-024", "EVO-OBS-P3-025"}
+    } == {"source_mutation_label_conflict_adjudicated"}
+    assert {
+        row.author_reported_mutation
+        for row in mutants
+        if row.observation_id in {"EVO-OBS-P3-024", "EVO-OBS-P3-025"}
+    } == {"N233Y"}
 
 
 def test_prior_study_rows_are_explicitly_non_independent() -> None:
