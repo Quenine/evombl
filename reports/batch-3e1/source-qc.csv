@@ -1,0 +1,16 @@
+variant_name,claim_scope,source_kind,source_locator,accession,validation_status,curator_note
+NDM-1,curated_original_reference,curated_database,CAZ39946.1,CAZ39946.1,valid,Protein and FN396876.1 reference provenance.
+NDM-1,primary_nucleotide_source,curated_database,FN396876.1,FN396876.1,valid,Original reference allele provenance.
+NDM-9,sequence_provenance,curated_database,AGU91756.1,AGU91756.1,valid,Curated protein payload provenance.
+NDM-9,primary_nucleotide_source,curated_database,KC999080.2,KC999080.2,valid,Primary allele provenance.
+NDM-9,secondary_protein_provenance,curated_database,WP_032495672.1,WP_032495672.1,valid,No independent payload comparison claimed.
+NDM-30,sequence_provenance,curated_database,WP_197749405.1,WP_197749405.1,valid,Payload grounded in WP_197749405.1 and NG_071206.1.
+NDM-30,sequence_source_nucleotide,curated_database,NG_071206.1,NG_071206.1,valid,Sequence-source provenance.
+NDM-30,original_discovery_provenance,primary_article,Park et al. 2022,MW306748.1,valid,Discovery accession retained; not independently translated or compared.
+VIM-1,historical_reference,curated_database,CAB46686.1,CAB46686.1,valid,Historical protein and Y18050 provenance.
+VIM-1,sequence_identical_secondary_provenance,curated_database,AAN63496.1,AAN63496.1,valid,AF317511.1 pair is secondary provenance and not another biological variant.
+VIM-1,sequence_identical_secondary_nucleotide_provenance,curated_database,AF317511.1,AF317511.1,valid,Sequence-identical secondary record provenance only.
+VIM-83,sequence_provenance,curated_database,UWI53403.1,UWI53403.1,valid,OP353772.1 is the paper-reported nucleotide accession.
+VIM-83,primary_nucleotide_source,curated_database,OP353772.1,OP353772.1,valid,Paper-reported nucleotide provenance.
+VIM-2,original_reference,curated_database,AAF61483.1,AAF61483.1,valid,Original protein and AF191564 provenance.
+VIM-2,primary_nucleotide_source,curated_database,AF191564,AF191564,valid,Original nucleotide provenance.

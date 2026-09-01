@@ -1,0 +1,4 @@
+reference_variant,comparison_variant,difference_count,observed_precursor_difference,coordinate_system,paper_reported_mutation,paper_numbering_scheme,verification_result
+NDM-1,NDM-9,1,E152K,full_length_precursor_1_based,E149K,BBL,verified
+NDM-1,NDM-30,1,D223Y,full_length_precursor_1_based,D236Y,BBL,verified
+VIM-1,VIM-83,1,E146K,full_length_precursor_1_based,E149K,BBL,verified

@@ -1,0 +1,16 @@
+variant_name,claim_scope,source_kind,source_name,source_locator,source_doi,accession,accessed_date,curator_note
+NDM-1,curated_original_reference,curated_database,NCBI Protein,CAZ39946.1,,CAZ39946.1,2026-08-31,Protein and FN396876.1 reference provenance.
+NDM-1,primary_nucleotide_source,curated_database,NCBI Nucleotide,FN396876.1,,FN396876.1,2026-08-31,Original reference allele provenance.
+NDM-9,sequence_provenance,curated_database,NCBI Protein,AGU91756.1,,AGU91756.1,2026-08-31,Curated protein payload provenance.
+NDM-9,primary_nucleotide_source,curated_database,NCBI Nucleotide,KC999080.2,,KC999080.2,2026-08-31,Primary allele provenance.
+NDM-9,secondary_protein_provenance,curated_database,RefSeq,WP_032495672.1,,WP_032495672.1,2026-08-31,No independent payload comparison claimed.
+NDM-30,sequence_provenance,curated_database,RefSeq,WP_197749405.1,,WP_197749405.1,2026-08-31,Payload grounded in WP_197749405.1 and NG_071206.1.
+NDM-30,sequence_source_nucleotide,curated_database,NCBI Nucleotide,NG_071206.1,,NG_071206.1,2026-08-31,Sequence-source provenance.
+NDM-30,original_discovery_provenance,primary_article,Journal of Global Antimicrobial Resistance,Park et al. 2022,10.1016/j.jgar.2022.01.009,MW306748.1,2026-08-31,Discovery accession retained; not independently translated or compared.
+VIM-1,historical_reference,curated_database,NCBI Protein,CAB46686.1,,CAB46686.1,2026-08-31,Historical protein and Y18050 provenance.
+VIM-1,sequence_identical_secondary_provenance,curated_database,NCBI Protein,AAN63496.1,,AAN63496.1,2026-08-31,AF317511.1 pair is secondary provenance and not another biological variant.
+VIM-1,sequence_identical_secondary_nucleotide_provenance,curated_database,NCBI Nucleotide,AF317511.1,,AF317511.1,2026-08-31,Sequence-identical secondary record provenance only.
+VIM-83,sequence_provenance,curated_database,NCBI Protein,UWI53403.1,,UWI53403.1,2026-08-31,OP353772.1 is the paper-reported nucleotide accession.
+VIM-83,primary_nucleotide_source,curated_database,NCBI Nucleotide,OP353772.1,,OP353772.1,2026-08-31,Paper-reported nucleotide provenance.
+VIM-2,original_reference,curated_database,NCBI Protein,AAF61483.1,,AAF61483.1,2026-08-31,Original protein and AF191564 provenance.
+VIM-2,primary_nucleotide_source,curated_database,NCBI Nucleotide,AF191564,,AF191564,2026-08-31,Original nucleotide provenance.
